@@ -103,7 +103,7 @@ fun {Drone NoteOrChord Amount}
   if Amount==0 then
     nil
   else
-    NoteOrChord|{Drone NoteOrChord Amount-1}
+    {ChordToExtended NoteOrChord}|{Drone NoteOrChord Amount-1}
   end
 end
 
@@ -155,9 +155,10 @@ end
        of nil then nil
        [] H|T then
           local
-            X
+            X Number
           in
-            X = {GetLetter {GetRow H}+{GetColumn H.octave}*12+Integer}
+            Number = {GetRow H}+{GetColumn H.octave}*12+Integer
+            X = {GetLetter Number}
             X.octave = {GetOctave Number}
             X.duration = H.duration
             X|{Transpose2 Integer T}
@@ -184,6 +185,5 @@ fun {PartitionToTimedList Partition}
      end
   end
 end
-%Partition = [silence b c d#2 b4 [e f5 g8]]
 
-{Browse {PartitionToTimedList Partition}}
+{Browse {PartitionToTimedList [a drone(amount:2 note:[a a#5]) duration(seconds:10.0 [c5 c#4]) stretch(factor:1.5 [b d]) transpose(semitones:2 [c1 b1]) ]}}

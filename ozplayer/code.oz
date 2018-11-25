@@ -161,9 +161,10 @@ local
          of nil then nil
          [] H|T then
             local
-              X
+              X Number
             in
-              X = {GetLetter {GetRow H}+{GetColumn H.octave}*12+Integer}
+              Number = {GetRow H}+{GetColumn H.octave}*12+Integer
+              X = {GetLetter Number}
               X.octave = {GetOctave Number}
               X.duration = H.duration
               X|{Transpose2 Integer T}
