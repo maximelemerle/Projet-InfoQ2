@@ -45,7 +45,7 @@ fun {Echantillon Partition}
         end
       end
       fun {Echantillon3 Note I}
-        if I<10 then
+        if I<44100 then
           {Echantillon2 Note I}|{Echantillon3 Note I+1}
         else nil
         end
