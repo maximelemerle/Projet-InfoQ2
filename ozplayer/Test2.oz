@@ -59,7 +59,7 @@ fun {Echantillon Partition}
     end
 end
 
-{Browse {RemoveDoubleList {Echantillon [note(duration:1.0 instrument:none name:a octave:4 sharp:false)]}}}
+{Browse {Echantillon [note(duration:1.0 instrument:none name:a octave:4 sharp:false)]}}
 
 
 
