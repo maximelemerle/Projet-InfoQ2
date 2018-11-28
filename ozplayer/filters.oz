@@ -58,14 +58,13 @@ fun {Echo Delay Decay Music}
   {Merge [1.0#Music Decay#{Append {L {Float.toInt Delay*1.0}} Music}]}
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%% !!!!!!!!!!!!!!!!!!!!!!! fadeout doit etre egal a 0 a la fin + take drop marche pas
-fun {Fade Music Start Out}
+fun {Fade Start Out Music}
    local
       fun {FadeIn Start Music Acc}
         case Music of nil then nil
         [] H|T then
           if {Int.toFloat Acc}<44100.0*Start then
-             {Int.toFloat H}*{Float.'/' {Int.toFloat Acc} Start*44100.0}|{FadeIn Start T Acc+1}
+             H*{Float.'/' {Int.toFloat Acc} Start*44100.0}|{FadeIn Start T Acc+1}
           else nil
           end
         end
@@ -75,13 +74,13 @@ fun {Fade Music Start Out}
         case Music of nil then nil
         [] H|T then
           if {Int.toFloat Acc}>=0.0 then
-             {Int.toFloat H}*{Float.'/' {Int.toFloat Acc} Out*44100.0}|{FadeOut Out T Acc-1}
+             H*{Float.'/' {Int.toFloat Acc} Out*44100.0}|{FadeOut Out T Acc-1}
           else nil
           end
         end
       end
    in
-      {Flatten [{FadeIn Start Music 0} {Cut Start Finish Music} {FadeOut Out L {Float.toInt 44100.0*Out-1.0}}]}
+      {Flatten [{FadeIn Start Music 0} {Cut Start Out Music} {FadeOut Out L {Float.toInt 44100.0*Out-1.0}}]}
    end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
