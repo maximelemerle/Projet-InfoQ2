@@ -227,6 +227,47 @@ local
        end
    end
 
+   fun {Merge MusicsList}
+     local
+       fun {Merge2 MusicsList L}
+         case MusicsList
+         of nil then L
+         [] H|T then
+           case H
+           of Facteur#List then
+             {Merge2 T {Sum L {Mult Facteur List}}}
+           end
+         end
+       end
+     in
+       {Clip ~1.0 1.0 {Merge2 MusicsList nil}}
+     end
+   end
+
+   fun {Sum List1 List2}
+     local
+       fun {Sum2 L1 L2}
+         case L1
+         of nil then L2
+         [] H|T then
+           L1.1+L2.1|{Sum2 L1.2 L2.2}
+         end
+       end
+     in
+       if {List.length List1}<{List.length List2} then {Sum2 List1 List2}
+       else {Sum2 List2 List1}
+       end
+     end
+   end
+
+   fun {Mult Facteur L}
+     case L
+     of nil then nil
+     [] H|T then
+       H*Facteur|{Mult Facteur T}
+     end
+   end
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
    Music = {Project.load 'joy.dj.oz'}

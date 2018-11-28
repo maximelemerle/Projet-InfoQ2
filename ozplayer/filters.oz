@@ -40,23 +40,22 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 fun {Clip Low High Music}
-  local
-    fun {Clip2 L1}
-      case L1
-      of nil then nil
-      [] H|T then
-        if H>High then
-          High|{Clip2 T}
-        elseif H<Low then
-          Low|{Clip2 T}
-        else
-          H|{Clip2 T}
-        end
+    case Music
+    of nil then nil
+    [] H|T then
+      if H>High then
+        High|{Clip Low High T}
+      elseif H<Low then
+        Low|{Clip Low High T}
+      else
+        H|{Clip Low High T}
       end
     end
-  in
-    {Clip2 Music}
-  end
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+fun {Echo Delay Decay Music}
+  {Merge [1.0#Music Decay#{Append {L {Float.toInt Delay*1.0}} Music}]}
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%% !!!!!!!!!!!!!!!!!!!!!!! fadeout doit etre egal a 0 a la fin + take drop marche pas
@@ -75,19 +74,17 @@ fun {Fade Music Start Out}
       fun {FadeOut Out Music Acc}
         case Music of nil then nil
         [] H|T then
-          if {Int.toFloat Acc}>0.0 then
+          if {Int.toFloat Acc}>=0.0 then
              {Int.toFloat H}*{Float.'/' {Int.toFloat Acc} Out*44100.0}|{FadeOut Out T Acc-1}
           else nil
           end
         end
       end
    in
-      {Flatten [{FadeIn Start Music 0} {List.drop {List.take Music {Float.toInt Out*5.0}} {Float.toInt Start*5.0}} {FadeOut Out L {Float.toInt 5.0*Out}}]}
+      {Flatten [{FadeIn Start Music 0} {Cut Start Finish Music} {FadeOut Out L {Float.toInt 44100.0*Out-1.0}}]}
    end
 end
-
-X = [1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1]
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 fun {Cut Start Finish Music}
   if Finish>{Int.toFloat {List.length Music}}/44100.0 then
@@ -95,7 +92,7 @@ fun {Cut Start Finish Music}
        L = {List.drop Music {Float.toInt Start*44100.0}}
        Length = 44100.0*(Finish-Start)-{Int.toFloat {List.length L}}
     in
-      {Flatten [L {List0 {Float.toInt Length}}]}
+      {Flatten [L {L {Float.toInt Length}}]}
     end
   else
     local
@@ -105,86 +102,12 @@ fun {Cut Start Finish Music}
     end
   end
 end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-fun {List0 T}
+fun {L T}
    if T==0 then
       nil
    else
-      0|{List0 T-1}
+      0.0|{L T-1}
    end
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-fun {Fade Music Start Out}
-   local
-      fun {FadeIn Start Music Acc}
-        case Music of nil then nil
-        [] H|T then
-          if {Int.toFloat Acc}<5.0*Start then
-             {Int.toFloat H}*{Float.'/' {Int.toFloat Acc} Start*5.0}|{FadeIn Start T Acc+1}
-          else nil
-          end
-        end
-      end
-      L =  {List.drop Music {List.length}-{Float.toInt Out*5.0}}
-      fun {FadeOut Out Music Acc}
-	 case Music
-	 of nil then nil
-	 [] H|T then
-	    if {Int.toFloat Acc}>0.0 then
-	       {Int.toFloat H}*{Float.'/' {Int.toFloat Acc} Out*5.0}|{FadeOut Out T Acc-1}
-	    else nil
-	    end
-	 end
-      end
-   in
-      {Flatten [{FadeIn Start Music 0} {List.drop {List.take Music Out*5.0} Start*5.0} {FadeOut Out L 5.0*Out}] }
-   end
-end
-
-X = [1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1]
-{Browse {Fade X 1.0 1.0}}

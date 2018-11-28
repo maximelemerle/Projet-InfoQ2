@@ -12,6 +12,14 @@ declare
 %    {Project.readFile 'wave/animaux/cow.wav'}
 % end
 
-fun {Merge Args}
+fun {Echo Delay Decay Music}
+  {Merge [1.0#Music Decay#{Append {L {Float.toInt Delay*1.0}} Music}]}
+end
 
+fun {L T}
+   if T==0 then
+      nil
+   else
+      0.0|{L T-1}
+   end
 end
