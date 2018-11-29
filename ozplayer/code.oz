@@ -194,10 +194,37 @@ local
    end
 
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
    fun {Mix P2T Music}
-      % TODO
+      case Music
+      of nil then nil
+      [] samples(Samples) then Samples
+      [] partition(Partition) then {Echantillon {P2T Partition}}
+      [] wave(File) then {Project.load File}
+      [] merge(MusicsList) then {Merge {MusicToList MusicsList P2T}}
+      else {Filtre Music}
+      end
       {Project.readFile 'wave/animaux/cow.wav'}
    end
+
+   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+   fun {Filtre P2T Music}
+      case Music
+      of nil then nil
+      [] reverse(Music) then                 {Reverse {Mix P2T Music}}
+      [] repeat(amount:Integer Music) then   {Repeat Integer {Mix P2T Music}}
+      [] loop(duration:Duration Music) then  {Loop Duration {Mix P2T Music}}
+      [] clip(low:Low high:High Music) then  {Clip Low High {Mix P2T Music}}
+      [] echo(delay:Delay decay:Decay Music) then {Echo Delay Decay {Mix P2T Music}}
+      [] fade(start:Start out:Out Music) then   {Fade Start Out {Mix P2T Music}}
+      [] cut(start:Start finish:End Music) then {Cut Start End {Mix P2T Music}}
+      end
+   end
+
+   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
    % Partition deja extended
    fun {Echantillon Partition}
@@ -213,7 +240,7 @@ local
            end
          end
          fun {Echantillon3 Note I}
-           if Note.duration*I<44100 then
+           if Note.duration*{Int.toFloat I}<44100.0 then
              {Echantillon2 Note I}|{Echantillon3 Note I+1}
            else nil
            end
@@ -222,9 +249,29 @@ local
          case Partition
          of nil then nil
          [] H|T then
-             {Echantillon3 H 1}|{Echantillon T}
+            case H
+            of nil then nil
+            [] H1|T1 then
+              {Merge {ListToListWithIntensitiesOne {Echantillon H}}}
+            else
+              {Echantillon3 H 1}|{Echantillon T}
+            end
          end
        end
+   end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+   fun {MusicToList MusicsList P2T}
+      case MusicsList
+      of nil then nil
+      [] H|T then
+        case H
+        of nil then nil
+        [] Facteur#Music then
+           Facteur#{Mix P2T Music}|{MusicToList T P2T}
+        end
+      end
    end
 
    fun {Merge MusicsList}

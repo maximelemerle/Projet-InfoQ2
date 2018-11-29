@@ -1,69 +1,38 @@
 declare
-% fun {Mix P2T Music}
-%    % TODO
-%    case Music
-%    of nil then nil
-%    [] samples(S) then samples(S)
-%    [] partition(P) then {Echantillon {P2T P}}
-%    [] wave(F) then
-%    [] merge(M) then
-%    else {Filtre }
-%    end
-%    {Project.readFile 'wave/animaux/cow.wav'}
-% end
+fun {Mix P2T Music}
+   case Music
+   of nil then nil
+   [] samples(Samples) then Samples
+   [] partition(Partition) then {Echantillon {P2T Partition}}
+   [] wave(File) then {Project.load File}
+   [] merge(MusicsList) then {Merge {MusicToList MusicsList P2T}}
+   else {Filtre P2T Music}
+   end
+   {Project.readFile 'wave/animaux/cow.wav'}
+end
 
-declare
-fun {Fade Start Out Music}
-   local
-      fun {FadeIn Start Music Acc}
-        case Music of nil then nil
-        [] H|T then
-          if {Int.toFloat Acc}<5.0*Start then
-             H*{Float.'/' {Int.toFloat Acc} Start*5.0}|{FadeIn Start T Acc+1}
-          else nil
-          end
-        end
-      end
-      L =  {List.drop Music {List.length Music}-{Float.toInt Out*5.0}}
-      fun {FadeOut Out Music Acc}
-        case Music of nil then nil
-        [] H|T then
-          if {Int.toFloat Acc}>=0.0 then
-             H*{Float.'/' {Int.toFloat Acc} Out*5.0}|{FadeOut Out T Acc-1}
-          else nil
-          end
-        end
-      end
-   in
-      {Flatten [{FadeIn Start Music 0} {Cut Start Out Music} {FadeOut Out L {Float.toInt 5.0*Out-1.0}}]}
+fun {MusicToList MusicsList P2T}
+   case MusicsList
+   of nil then nil
+   [] H|T then
+     case H
+     of nil then nil
+     [] Facteur#Music then
+        Facteur#{Mix P2T Music}|{MusicToList T P2T}
+     end
    end
 end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-fun {Cut Start Finish Music}
-  if Finish>{Int.toFloat {List.length Music}}/5.0 then
-    local
-       L = {List.drop Music {Float.toInt Start*5.0}}
-       Length = 5.0*(Finish-Start)-{Int.toFloat {List.length L}}
-    in
-      {Flatten [L {L {Float.toInt Length}}]}
-    end
-  else
-    local
-      X = {List.drop Music {Float.toInt Start*5.0}}
-    in
-      {List.take X {Float.toInt Finish*5.0}}
-    end
-  end
-end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-fun {L T}
-   if T==0 then
-      nil
-   else
-      0.0|{L T-1}
+fun {Filtre P2T Music}
+   case Music
+   of nil then nil
+   [] reverse(Music) then                 {Reverse {Mix P2T Music}}
+   [] repeat(amount:Integer Music) then   {Repeat Integer {Mix P2T Music}}
+   [] loop(duration:Duration Music) then  {Loop Duration {Mix P2T Music}}
+   [] clip(low:Low high:High Music) then  {Clip Low High {Mix P2T Music}}
+   [] echo(delay:Delay Music) then        {Echo Delay {Mix P2T Music}}
+   [] fade(in:Start out:Out Music) then   {Fade Start Out {Mix P2T Music}}
+   [] cut(start:Start end:End Music) then {Cut Start End {Mix P2T Music}}
    end
 end
-X = [1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0]
-{Browse {Fade 1.0 1.0 X}}

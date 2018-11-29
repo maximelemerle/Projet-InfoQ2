@@ -1,12 +1,5 @@
 declare
 
-fun {Filtre Args}
-  case Args
-  of nil then nil
-  [] reverse() then {Reverse {Mix P2T .....}}
-  end
-end
-
 % Transforme music en samples puis renverse
 % Mettre fct custom%%%%%%%%%%%%%%%%%%%% !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 fun {Reverse Music}
