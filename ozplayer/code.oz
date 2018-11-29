@@ -45,7 +45,8 @@ local
      of nil then nil
      [] H|T then
          case H
-         of H1|T1 then {ChordToExtended H}|{ChordToExtended T}
+         of nil then nil
+         [] H1|T1 then {ChordToExtended H}|{ChordToExtended T}
          else {NoteToExtended H}|{ChordToExtended T}
          end
      else nil
@@ -188,9 +189,19 @@ local
        [] H1|T1 then
           {ChordToExtended H}|{PartitionToTimedList T}
        else
-          {NoteToExtended H}|{PartitionToTimedList T}
+          {Append2 {NoteToExtended H} {PartitionToTimedList T}}
        end
      end
+   end
+
+   fun {Append2 L1 L2}
+      case L1
+      of nil then nil
+      [] H|T then
+          {Append L1 L2}
+      else
+          {Append L1|nil L2}
+      end
    end
 
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -200,13 +211,16 @@ local
    fun {Mix P2T Music}
       case Music
       of nil then nil
-      [] samples(Samples) then Samples
-      [] partition(Partition) then {Echantillon {P2T Partition}}
-      [] wave(File) then {Project.load File}
-      [] merge(MusicsList) then {Merge {MusicToList MusicsList P2T}}
-      else {Filtre Music}
+      [] H|T then
+        case H
+        of samples(Samples) then Samples|{Mix P2T T}
+        [] partition(Partition) then {Append {Echantillon {P2T Partition}} {Mix P2T T}}
+        [] wave(File) then {Project.load File}|{Mix P2T T}
+        [] merge(MusicsList) then {Merge {MusicToList MusicsList P2T}}|{Mix P2T T}
+        else {Filtre P2T Music}|{Mix P2T T}
+        end
       end
-      {Project.readFile 'wave/animaux/cow.wav'}
+      %{Project.readFile 'wave/animaux/cow.wav'}
    end
 
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -258,6 +272,14 @@ local
             end
          end
        end
+   end
+
+   fun {ListToListWithIntensitiesOne L}
+     case L
+     of nil then nil
+     [] H|T then
+       1.0#H|{ListToListWithIntensitiesOne T}
+     end
    end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -317,6 +339,113 @@ local
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+
+
+% Transforme music en samples puis renverse
+% Mettre fct custom%%%%%%%%%%%%%%%%%%%% !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+fun {Reverse Music}
+  {List.reverse Music}
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+fun {Repeat Integer Music}
+  if Integer==0 then
+    nil
+  else
+    Music|{Repeat Integer-1 Music}
+  end
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+fun {Loop Duration Music}
+  local
+    Taille = {List.length Music}
+    X Y
+  in
+    if Taille<Duration then
+      X = Duration mod Taille
+      Y = Duration div Taille
+      {Flatten {Repeat Y Music}|{List.take Music X*44100}}
+    else
+      {List.take Music X*44100}
+    end
+  end
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+fun {Clip Low High Music}
+    case Music
+    of nil then nil
+    [] H|T then
+      if H>High then
+        High|{Clip Low High T}
+      elseif H<Low then
+        Low|{Clip Low High T}
+      else
+        H|{Clip Low High T}
+      end
+    end
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+fun {Echo Delay Decay Music}
+  {Merge [1.0#Music Decay#{Append {L {Float.toInt Delay*44100.0}} Music}]}
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+fun {Fade Start Out Music}
+   local
+      fun {FadeIn Start Music Acc}
+        case Music of nil then nil
+        [] H|T then
+          if {Int.toFloat Acc}<44100.0*Start then
+             H*{Float.'/' {Int.toFloat Acc} Start*44100.0}|{FadeIn Start T Acc+1}
+          else nil
+          end
+        end
+      end
+      L =  {List.drop Music {List.length Music}-{Float.toInt Out*44100.0}}
+      fun {FadeOut Out Music Acc}
+        case Music of nil then nil
+        [] H|T then
+          if {Int.toFloat Acc}>=0.0 then
+             H*{Float.'/' {Int.toFloat Acc} Out*44100.0}|{FadeOut Out T Acc-1}
+          else nil
+          end
+        end
+      end
+   in
+      {Flatten [{FadeIn Start Music 0} {Cut Start Out Music} {FadeOut Out L {Float.toInt 44100.0*Out-1.0}}]}
+   end
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+fun {Cut Start Finish Music}
+  if Finish>{Int.toFloat {List.length Music}}/44100.0 then
+    local
+       L = {List.drop Music {Float.toInt Start*44100.0}}
+       Length = 44100.0*(Finish-Start)-{Int.toFloat {List.length L}}
+    in
+      {Flatten [L {L {Float.toInt Length}}]}
+    end
+  else
+    local
+      X = {List.drop Music {Float.toInt Start*44100.0}}
+    in
+      {List.take X {Float.toInt Finish*44100.0}}
+    end
+  end
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+fun {L T}
+   if T==0 then
+      nil
+   else
+      0.0|{L T-1}
+   end
+end
+
+
    Music = {Project.load 'joy.dj.oz'}
    Start
 
@@ -336,7 +465,9 @@ in
    % Calls your code, prints the result and outputs the result to `out.wav`.
    % You don't need to modify this.
    {Browse {Project.run Mix PartitionToTimedList Music 'out.wav'}}
+   %{Browse {Mix PartitionToTimedList Music}}
+
 
    % Shows the total time to run your code.
-   {Browse {IntToFloat {Time}-Start} / 1000.0}
+   %{Browse {IntToFloat {Time}-Start} / 1000.0}
 end

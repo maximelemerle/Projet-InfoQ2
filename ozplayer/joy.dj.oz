@@ -12,5 +12,4 @@ local
 in
    % This is a music :)
    [partition(Partition)]
-   {Browse Partition}
 end
