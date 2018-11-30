@@ -38,34 +38,88 @@ end
 % TEST PartitionToTimedNotes
 
 proc {TestNotes P2T}
-   {AssertEquals {PartitionToTimedList [a# b c d#2 b4 [e f5 g8]]} [note(duration:1 instrument:none name:a octave:4 sharp:true) note(duration:1 instrument:none name:b octave:4 sharp:false)
-     note(duration:1 instrument:none name:c octave:4 sharp:false) note(duration:1 instrument:none name:d octave:2 sharp:true) note(duration:1 instrument:none name:b octave:4 sharp:false)
-     [note(duration:1 instrument:none name:e octave:4 sharp:false) note(duration:1 instrument:none name:f octave:5 sharp:false) note(duration:1 instrument:none name:g octave:8 sharp:false)]]}
+    local
+      X = [a# b c d#2 b4 [e f5 g8]]
+      Y = [note(duration:1.0 instrument:none name:a octave:4 sharp:true) note(duration:1.0 instrument:none name:b octave:4 sharp:false)
+        note(duration:1.0 instrument:none name:c octave:4 sharp:false) note(duration:1.0 instrument:none name:d octave:2 sharp:true) note(duration:1.0 instrument:none name:b octave:4 sharp:false)
+        [note(duration:1.0 instrument:none name:e octave:4 sharp:false) note(duration:1.0 instrument:none name:f octave:5 sharp:false) note(duration:1.0 instrument:none name:g octave:8 sharp:false)]]
+    in
+      {AssertEquals {P2T X} Y 'TestNotes'}
+    end
 end
 
 proc {TestChords P2T}
-   skip
+   local
+     X = [a# b [c d e5 f8] [f10 d9]]
+     Y = [note(duration:1.0 instrument:none name:a octave:4 sharp:true) note(duration:1.0 instrument:none name:b octave:4 sharp:false)
+      [note(duration:1.0 instrument:none name:c octave:4 sharp:false) note(duration:1.0 instrument:none name:d octave:4 sharp:false) note(duration:1.0 instrument:none name:e octave:5 sharp:false) note(duration:1.0 instrument:none name:f octave:8 sharp:false)]
+      [note(duration:1.0 instrument:none name:f octave:10 sharp:false) note(duration:1.0 instrument:none name:d octave:9 sharp:false)]]
+   in
+      {AssertEquals {P2T X} Y 'TestChords'}
+   end
 end
 
 proc {TestIdentity P2T}
    % test that extended notes and chord go from input to output unchanged
-   skip
+   local
+     X = [a# b [c# d e5 f8] [f#10 d9]]
+     Y = [note(duration:1.0 instrument:none name:a octave:4 sharp:true) note(duration:1.0 instrument:none name:b octave:4 sharp:false)
+      [note(duration:1.0 instrument:none name:c octave:4 sharp:true) note(duration:1.0 instrument:none name:d octave:4 sharp:false) note(duration:1.0 instrument:none name:e octave:5 sharp:false) note(duration:1.0 instrument:none name:f octave:8 sharp:false)]
+      [note(duration:1.0 instrument:none name:f octave:10 sharp:false) note(duration:1.0 instrument:none name:d octave:9 sharp:false)]]
+   in
+      {AssertEquals {P2T X} Y 'TestChords'}
+   end
 end
 
 proc {TestDuration P2T}
-   skip
+  local
+    X = [duration(seconds:10.0 [c d e5 f8]) duration(seconds:5.0 [f10 duration(seconds:3.0 [d9]) duration(seconds:1.0 [a7])])]
+    Y = [note(duration:2.5 instrument:none name:c octave:4 sharp:false) note(duration:2.5 instrument:none name:d octave:4 sharp:false) note(duration:2.5 instrument:none name:e octave:5 sharp:false) note(duration:2.5 instrument:none name:f octave:8 sharp:false)
+     note(duration:1.0 instrument:none name:f octave:10 sharp:false) note(duration:3.0 instrument:none name:d octave:9 sharp:false) note(duration:2.5 instrument:none name:a octave:7 sharp:false)]
+  in
+     {AssertEquals {P2T X} Y 'TestDuration'}
+  end
 end
 
 proc {TestStretch P2T}
-   skip
+  local
+    X = [stretch(factor:2.5 [c d e5 f8]) stretch(factor:5.0 [f10 stretch(factor:3.0 [d9]) stretch(factor:2.0 [a7])])]
+    Y = [note(duration:2.5 instrument:none name:c octave:4 sharp:false) note(duration:2.5 instrument:none name:d octave:4 sharp:false) note(duration:2.5 instrument:none name:e octave:5 sharp:false) note(duration:2.5 instrument:none name:f octave:8 sharp:false)
+     note(duration:5.0 instrument:none name:f octave:10 sharp:false) note(duration:15.0 instrument:none name:d octave:9 sharp:false) note(duration:10.0 instrument:none name:a octave:7 sharp:false)]
+  in
+     {AssertEquals {P2T X} Y 'TestStretch'}
+  end
 end
 
 proc {TestDrone P2T}
-   skip
+  local
+    X = [drone(amount:2 note:[c d e5 f8]) drone(amount:2 note:[f10 drone(amount:3 note:[d9]) drone(amount:2 note:[a7])])]
+    Y = [
+     note(duration:2.5 instrument:none name:c octave:4 sharp:false) note(duration:2.5 instrument:none name:d octave:4 sharp:false) note(duration:2.5 instrument:none name:e octave:5 sharp:false) note(duration:2.5 instrument:none name:f octave:8 sharp:false)
+     note(duration:5.0 instrument:none name:f octave:10 sharp:false)
+     note(duration:2.5 instrument:none name:c octave:4 sharp:false) note(duration:2.5 instrument:none name:d octave:4 sharp:false) note(duration:2.5 instrument:none name:e octave:5 sharp:false) note(duration:2.5 instrument:none name:f octave:8 sharp:false)
+     note(duration:5.0 instrument:none name:f octave:10 sharp:false)
+     note(duration:15.0 instrument:none name:d octave:9 sharp:false) note(duration:15.0 instrument:none name:d octave:9 sharp:false) note(duration:15.0 instrument:none name:d octave:9 sharp:false)
+     note(duration:10.0 instrument:none name:a octave:7 sharp:false) note(duration:10.0 instrument:none name:a octave:7 sharp:false)
+     note(duration:5.0 instrument:none name:f octave:10 sharp:false)
+     note(duration:15.0 instrument:none name:d octave:9 sharp:false) note(duration:15.0 instrument:none name:d octave:9 sharp:false) note(duration:15.0 instrument:none name:d octave:9 sharp:false)
+     note(duration:10.0 instrument:none name:a octave:7 sharp:false) note(duration:10.0 instrument:none name:a octave:7 sharp:false)
+     ]
+  in
+     {AssertEquals {P2T X} Y 'TestDrone'}
+  end
 end
 
 proc {TestTranspose P2T}
-   skip
+   local
+     X = [transpose(semitones:2 [a a#4 c [e7 g10]])]
+     Y = [
+     note(duration:1.0 instrument:none name:b octave:4 sharp:false) note(duration:1.0 instrument:none name:c octave:5 sharp:false) note(duration:1.0 instrument:none name:d octave:4 sharp:false)
+     [note(duration:1.0 instrument:none name:f octave:7 sharp:true) note(duration:1.0 instrument:none name:a octave:10 sharp:false)]
+     ]
+   in
+    {AssertEquals {P2T X} Y 'TestTranspose'}
+   end
 end
 
 proc {TestP2TChaining P2T}
@@ -74,7 +128,12 @@ proc {TestP2TChaining P2T}
 end
 
 proc {TestEmptyChords P2T}
-   skip
+  local
+    X = [ nil stretch(factor:2.5 nil) duration(seconds:10.0 nil) transpose(semitones:2 nil) drone(amount:10 nil)]
+    Y = nil
+  in
+   {AssertEquals {P2T X} Y 'TestEmptyChords'}
+  end
 end
 
 proc {TestP2T P2T}
@@ -160,7 +219,7 @@ proc {Test Mix P2T}
    {System.show 'tests have started'}
    {TestP2T P2T}
    {System.show 'P2T tests have run'}
-   {TestMix P2T Mix}
-   {System.show 'Mix tests have run'}
+   %{TestMix P2T Mix}
+   %{System.show 'Mix tests have run'}
    {System.show test(passed:@PassedTests total:@TotalTests)}
 end

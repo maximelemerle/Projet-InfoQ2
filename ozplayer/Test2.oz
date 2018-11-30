@@ -38,3 +38,12 @@ fun {Mix P2T Music}
    end
    %{Project.readFile 'wave/animaux/cow.wav'}
 end
+
+
+[] [N O A] then
+   note(name:{StringToAtom [N]}
+        octave:{StringToInt [O A]}
+        sharp:false
+        duration:1.0
+        instrument: none)
+end
