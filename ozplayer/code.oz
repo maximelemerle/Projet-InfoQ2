@@ -62,15 +62,15 @@ local
          of nil then {Float.'/' S Acc}
          [] H|T then
             case H
-            of nil then S/Acc
-            [] H1|T1 then {DRatio H S Acc}
+            of nil then Acc %avant S/Acc&é
+            [] H1|T1 then {DRatio H S Acc}%peut etre {DRatio T S Acc+{DRatio H S Acc}}
             else {DRatio T S Acc+H.duration}
             end
          end
        end
        Partition = {ChordToExtended P}
      in
-      {Stretch Partition {DRatio Partition S 0.0}}
+      {Stretch Partition S/{DRatio Partition S 0.0}}
      end
   end
 
@@ -79,27 +79,19 @@ local
    fun {Stretch Partition Facteur}
      local
          fun {Str Partition Facteur}
-           local
-             X
-           in
-             case Partition
-             of nil then nil
-             [] H|T then
-                case H
-                of H1|T1 then
-                  {Str H Facteur}
-                else
-                   X = {Record.clone H}
-                   X.name = H.name
-                   X.duration = H.duration*Facteur
-                   X.octave = H.octave
-                   X.sharp = H.sharp
-                   X.instrument = H.instrument
-                   X|{Str T Facteur}
-                end
-             end
+           case Partition
+           of nil then nil
+           [] H|T then
+              case H
+              of H1|T1 then
+                 {Append {Str {ChordToExtended H} Facteur} {Str T Facteur}}
+              [] silence(duration:D) then
+                 silence(duration:D*Facteur)|{Str T Facteur}
+             else
+                 note(name:H.name octave:H.octave sharp:H.sharp duration:H.duration*Facteur instrument:H.instrument)|{Str T Facteur}
+              end
            end
-         end
+       end
     in
       {Str {ChordToExtended Partition} Facteur}
     end
@@ -254,7 +246,13 @@ local
          end
          fun {Echantillon2 Note I}
            local
-           	    X = 3.14159265359*{Pow 2.0 {Float.'/' {Int.toFloat {Hauteur Note}} 12.0}}*{Float.'/' Note.duration*{Int.toFloat I}*44.0 2205.0}
+              X
+                case Note
+                of silence(duration:D) then
+                    X = 0.0
+                else
+                    X = 3.14159265359*{Pow 2.0 {Float.'/' {Int.toFloat {Hauteur Note}} 12.0}}*{Float.'/' Note.duration*{Int.toFloat I}*44.0 2205.0}
+                end
            	 in
            	    {Float.sin X}/2.0
            end
@@ -469,9 +467,9 @@ in
 
    % Calls your code, prints the result and outputs the result to `out.wav`.
    % You don't need to modify this.
-   {Browse {Project.run Mix PartitionToTimedList Music 'out.wav'}}
+   %{Browse {Project.run Mix PartitionToTimedList Music 'out.wav'}}
    %{Browse {List.length {Mix PartitionToTimedList Music}}}
-   %{Browse {PartitionToTimedList Music}}
+   {Browse {PartitionToTimedList Music}}
    %{Browse {List.length {Echantillon {PartitionToTimedList [duration(seconds:5.0 [a])]}}.1}}
    %{Browse Music}
 

@@ -38,7 +38,6 @@ end
 % TEST PartitionToTimedNotes
 
 proc {TestNotes P2T}
-   {Browse 'Test Notes'}
    {AssertEquals {PartitionToTimedList [a# b c d#2 b4 [e f5 g8]]} [note(duration:1 instrument:none name:a octave:4 sharp:true) note(duration:1 instrument:none name:b octave:4 sharp:false)
      note(duration:1 instrument:none name:c octave:4 sharp:false) note(duration:1 instrument:none name:d octave:2 sharp:true) note(duration:1 instrument:none name:b octave:4 sharp:false)
      [note(duration:1 instrument:none name:e octave:4 sharp:false) note(duration:1 instrument:none name:f octave:5 sharp:false) note(duration:1 instrument:none name:g octave:8 sharp:false)]]}
