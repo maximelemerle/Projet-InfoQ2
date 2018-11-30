@@ -5,7 +5,10 @@ local
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-   % Translate a note to the extended notation.
+   
+   % Recois une note en argument 
+   % Transforme une note en note etendue 
+   
    fun {NoteToExtended Note}
       case Note
       of note(duration:D instrument:I name:N octave:O sharp:S) then
@@ -40,6 +43,9 @@ local
 
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+   % Recois un accord en argument 
+   % Transforme un accord en accord etendu 
+   
    fun {ChordToExtended Chord}
      case Chord
      of nil then nil
@@ -55,9 +61,12 @@ local
 
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+   % Recois une partition et une duree en argument
+   % Fixe la durée de la partition en adaptant la duree de chaque note
+   
    fun {Duration P S}
      local
-       fun {DRatio P S Acc}
+       fun {DRatio P S Acc}  % Trouve le ratio necessaire pour executer la fonction stretch 
          case P
          of nil then {Float.'/' S Acc}
          [] H|T then
@@ -70,15 +79,18 @@ local
        end
        Partition = {ChordToExtended P}
      in
-      {Stretch Partition S/{DRatio Partition S 0.0}}
+      {Stretch Partition S/{DRatio Partition S 0.0}}  % Utilise la fonction stretch pour changer la duree des notes
      end
   end
 
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+   % Recois une partition et un facteur en argument
+   % Etire la duree de la partition par le facteur indique
+   
    fun {Stretch Partition Facteur}
      local
-         fun {Str Partition Facteur}
+         fun {Str Partition Facteur}   % !!!!!!!!!!!! pq 2 fonctions meme argument !!!!!!!!!!!!!!!!!!
            case Partition
            of nil then nil
            [] H|T then
@@ -99,6 +111,9 @@ local
 
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+   % Recois un(e) note/accord ainsi qu un entier en argument 
+   % Repete une note/accord identique autant de fois qu indique par l entier
+   
    fun {Drone NoteOrChord Amount}
      if Amount==0 then nil
      else
@@ -108,6 +123,10 @@ local
 
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+   % Recois une note en argument
+   % Se base sur le tableau des notes: https://en.wikipedia.org/wiki/Scientific_pitch_notation 
+   % Retourne la ligne en fonction de la note
+   
    fun {GetRow Note}
      case Note
      of note(name:c octave:_ sharp:false duration:_ instrument:none) then 0
@@ -124,10 +143,15 @@ local
      [] note(name:b octave:_ sharp:false duration:_ instrument:none) then 11
      end
    end
+   
+   % Recois une octave en argument
+   % Retourne la colonne en fonction de la note
    fun {GetColumn Octave}
      Octave+1
    end
 
+   % Recois un entier et une partition en argument
+   % Retrouve le numero en fonction de la note, ajoute l entier et retrouve la note en fonction du numero
    fun {Transpose Integer Partition}
      local
        P = {ChordToExtended Partition}
@@ -147,9 +171,15 @@ local
          [] 11 then note(name:b octave:_ sharp:false duration:_ instrument:none)
          end
        end
+        
+       % Recois le numero de la note en argument
+       % Retrouve l octave en fonction de ce numero
        fun {GetOctave Number}
           Number div 12 -1
        end
+        
+       % Recois un entier et une partition en argument
+       % apelle les autres fonctions et additionne le numero de la note avec l entier 
        fun {Transpose2 Integer Partition}
          case Partition
          of nil then nil
@@ -171,7 +201,9 @@ local
    end
 
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+ 
+   % Recois une partition en argument 
+   % Parcours la partition et apelle NoteToExtendedNote 
    fun {PartitionToTimedList Partition}
      case Partition
      of nil then nil
@@ -200,6 +232,8 @@ local
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+   % Recois une musique et une fonction qui satisfait la spécification de PartitionToTimedList en argument
+   % Retourne une liste d echantillons
    fun {Mix P2T Music}
       local
         fun {Mix2 P2T Music}
@@ -223,6 +257,8 @@ local
 
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+   % Idem Mix...
+   % Apelle une des fonction filtre     !!! Les arguments des filtres sont des musiques deja echantilonnee !!!
    fun {Filtre P2T Music}
       case Music
       of nil then nil
@@ -238,13 +274,14 @@ local
 
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-   % Partition deja extended
+   % Prend une partition en argument
+   % Renvoie la liste d echantillon correspondant a la partition
    fun {Echantillon Partition}
        local
-         fun {Hauteur Note}
+         fun {Hauteur Note}   % trouve la hauteur de la note 
             {GetRow Note}+{GetColumn Note.octave}*12-69
          end
-         fun {Echantillon2 Note I}
+         fun {Echantillon2 Note I}  % Echantillonne une note sur sa duree (44100 fois par seconde)
            local
               X
                 case Note
@@ -257,7 +294,7 @@ local
            	    {Float.sin X}/2.0
            end
          end
-         fun {Echantillon3 Note I}
+         fun {Echantillon3 Note I} % Parcours la partition    !!!!!!!!!!!!!!!OPTI!!!!!!!!!!!!!!!!
            if {Int.toFloat I}=<44100.0*Note.duration then
              {Echantillon2 Note I}|{Echantillon3 Note I+1}
            else nil
@@ -277,7 +314,7 @@ local
        end
    end
 
-   fun {ListToListWithIntensitiesOne L}
+   fun {ListToListWithIntensitiesOne L}   % MASKIM TU DIRRAS A QUOI SERT CETRTE MERDE TOI MEME 
      case L
      of nil then nil
      [] H|T then
@@ -287,6 +324,8 @@ local
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+   % Recois une MASK TU EXPLIQUERA CETTE MERDE AUSSI
+   %
    fun {MusicToList MusicsList P2T}
       case MusicsList
       of nil then nil
@@ -342,15 +381,16 @@ local
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-
-% Transforme music en samples puis renverse
-% Mettre fct custom%%%%%%%%%%%%%%%%%%%% !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+% Recois une musique en argument
+% Renverse la liste des echantillons
 fun {Reverse Music}
   {List.reverse Music}
 end
+   
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% Recois une musique et un entier en argument
+% Repete la liste le nombre de fois indique
 fun {Repeat Integer Music}
   if Integer==0 then
     nil
@@ -358,14 +398,17 @@ fun {Repeat Integer Music}
     Music|{Repeat Integer-1 Music}
   end
 end
+   
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% Recois une musique et une duree en argument
+% Joue la musique en boucle pour le nombre de secondes indiquees
 fun {Loop Duration Music}
   local
     Taille = {List.length Music}
     X Y
   in
-    if Taille<Duration then
+    if Taille<Duration then   % Si la musique dépasse la duree on calcule le nombre de fois et la duree du dernier bout a rajouter
       X = Duration mod Taille
       Y = Duration div Taille
       {Flatten {Repeat Y Music}|{List.take Music X*44100}}
@@ -374,8 +417,11 @@ fun {Loop Duration Music}
     end
   end
 end
+   
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% Recoi une musique et un entier en argument
+% Repete la liste le nombre de fois indique
 fun {Clip Low High Music}
     case Music
     of nil then nil
@@ -389,12 +435,20 @@ fun {Clip Low High Music}
       end
     end
 end
+   
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% Recois un delai une intensite (dacay) et une musique 
+   % Cree un double de la musique et merge avec la musique de depart 
 fun {Echo Delay Decay Music}
   {Merge [1.0#Music Decay#{Append {L {Float.toInt Delay*44100.0}} Music}]}
 end
+   
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+   
+% Recois une duree d entree , de sortie et une musique
+% Cree un fondu pour adoucir les transition d un morceau en faisant
+% varier l intensite de 0 a 1 ou inversement sur le temps voulu
 fun {Fade Start Out Music}
    local
       fun {FadeIn Start Music Acc}
@@ -420,8 +474,11 @@ fun {Fade Start Out Music}
       {Flatten [{FadeIn Start Music 0} {Cut Start Out Music} {FadeOut Out L {Float.toInt 44100.0*Out-1.0}}]}
    end
 end
+   
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% Recois un temps de depart et de fin ainsi qu une musique
+% Recupere une portion de musique
 fun {Cut Start Finish Music}
   if Finish>{Int.toFloat {List.length Music}}/44100.0 then
     local
@@ -438,8 +495,11 @@ fun {Cut Start Finish Music}
     end
   end
 end
+   
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+   
+% Recois une taille en argument
+% Cree une liste de 0 de taille T
 fun {L T}
    if T==0 then
       nil
@@ -447,6 +507,9 @@ fun {L T}
       0.0|{L T-1}
    end
 end
+   
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 
    Music = {Project.load 'Crazyfrog.dj.oz'}
@@ -479,3 +542,18 @@ in
    % Shows the total time to run your code.
    {Browse {IntToFloat {Time}-Start} / 1000.0}
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
