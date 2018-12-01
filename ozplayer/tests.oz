@@ -20,6 +20,46 @@ proc {Assert Cond Msg}
    end
 end
 
+proc {AssertListEqual Liste1 Liste2 Msg MsgFailed}
+  local
+    fun {AssertListEquals2 L1 L2}
+      case L1
+      of nil then
+          if L2==nil then
+            true
+          end
+      [] H|T then
+          case L2
+          of nil then false
+          [] H2|T2 then
+              if H==H2 then
+                {AssertListEquals2 T T2}
+              else false
+              end
+          end
+      end
+    end
+  in
+    if {List.length Liste1}=={List.length Liste2} then
+        if {AssertListEquals2 Liste1 Liste2} then
+            {Browse Msg}
+        else
+          {Browse 'Liste1'}
+          {Browse Liste1}
+          {Browse 'Liste2'}
+          {Browse Liste2}
+          {Browse MsgFailed}
+        end
+    else
+      {Browse 'Liste1'}
+      {Browse Liste1}
+      {Browse 'Liste2'}
+      {Browse Liste2}
+      {Browse MsgFailed}
+    end
+  end
+end
+
 proc {AssertEquals A E Msg}
    TotalTests := @TotalTests + 1
    if A \= E then
@@ -39,61 +79,61 @@ end
 
 proc {TestNotes P2T}
     local
-      X = [a# b c d#2 b4 [e f5 g8]]
+      X = {P2T [a#4 b c d#2 b4 [e f5 g8]]}
       Y = [note(duration:1.0 instrument:none name:a octave:4 sharp:true) note(duration:1.0 instrument:none name:b octave:4 sharp:false)
         note(duration:1.0 instrument:none name:c octave:4 sharp:false) note(duration:1.0 instrument:none name:d octave:2 sharp:true) note(duration:1.0 instrument:none name:b octave:4 sharp:false)
         [note(duration:1.0 instrument:none name:e octave:4 sharp:false) note(duration:1.0 instrument:none name:f octave:5 sharp:false) note(duration:1.0 instrument:none name:g octave:8 sharp:false)]]
     in
-      {AssertEquals {P2T X} Y 'TestNotes'}
+      {AssertListEqual X Y 'TestNotes Suceeded' 'TestNotes Failed'}
     end
 end
 
 proc {TestChords P2T}
    local
-     X = [a# b [c d e5 f8] [f10 d9]]
+     X = {P2T [a#4 b [c d e5 f8] [f10 d9]]}
      Y = [note(duration:1.0 instrument:none name:a octave:4 sharp:true) note(duration:1.0 instrument:none name:b octave:4 sharp:false)
       [note(duration:1.0 instrument:none name:c octave:4 sharp:false) note(duration:1.0 instrument:none name:d octave:4 sharp:false) note(duration:1.0 instrument:none name:e octave:5 sharp:false) note(duration:1.0 instrument:none name:f octave:8 sharp:false)]
       [note(duration:1.0 instrument:none name:f octave:10 sharp:false) note(duration:1.0 instrument:none name:d octave:9 sharp:false)]]
    in
-      {AssertEquals {P2T X} Y 'TestChords'}
+      {AssertListEqual X Y 'TestChords Suceeded' 'TestChords Failed'}
    end
 end
 
 proc {TestIdentity P2T}
    % test that extended notes and chord go from input to output unchanged
    local
-     X = [a# b [c# d e5 f8] [f#10 d9]]
+     X = {P2T [a#4 b [c#4 d e5 f8] [f#10 d9]]}
      Y = [note(duration:1.0 instrument:none name:a octave:4 sharp:true) note(duration:1.0 instrument:none name:b octave:4 sharp:false)
       [note(duration:1.0 instrument:none name:c octave:4 sharp:true) note(duration:1.0 instrument:none name:d octave:4 sharp:false) note(duration:1.0 instrument:none name:e octave:5 sharp:false) note(duration:1.0 instrument:none name:f octave:8 sharp:false)]
       [note(duration:1.0 instrument:none name:f octave:10 sharp:false) note(duration:1.0 instrument:none name:d octave:9 sharp:false)]]
    in
-      {AssertEquals {P2T X} Y 'TestChords'}
+      {AssertListEqual X Y 'TestIdentity Suceeded' 'TestIdentity Failed'}
    end
 end
 
 proc {TestDuration P2T}
   local
-    X = [duration(seconds:10.0 [c d e5 f8]) duration(seconds:5.0 [f10 duration(seconds:3.0 [d9]) duration(seconds:1.0 [a7])])]
+    X = {P2T [duration(seconds:10.0 [c d e5 f8]) duration(seconds:5.0 [f10 duration(seconds:3.0 [d9]) duration(seconds:1.0 [a7])])]}
     Y = [note(duration:2.5 instrument:none name:c octave:4 sharp:false) note(duration:2.5 instrument:none name:d octave:4 sharp:false) note(duration:2.5 instrument:none name:e octave:5 sharp:false) note(duration:2.5 instrument:none name:f octave:8 sharp:false)
-     note(duration:1.0 instrument:none name:f octave:10 sharp:false) note(duration:3.0 instrument:none name:d octave:9 sharp:false) note(duration:2.5 instrument:none name:a octave:7 sharp:false)]
+     note(duration:1.0 instrument:none name:f octave:10 sharp:false) note(duration:3.0 instrument:none name:d octave:9 sharp:false) note(duration:1.0 instrument:none name:a octave:7 sharp:false)]
   in
-     {AssertEquals {P2T X} Y 'TestDuration'}
+     {AssertListEqual X Y 'TestDuration Suceeded' 'TestDuration Failed'}
   end
 end
 
 proc {TestStretch P2T}
   local
-    X = [stretch(factor:2.5 [c d e5 f8]) stretch(factor:5.0 [f10 stretch(factor:3.0 [d9]) stretch(factor:2.0 [a7])])]
+    X = {P2T [stretch(factor:2.5 [c d e5 f8]) stretch(factor:5.0 [f10 stretch(factor:3.0 [d9]) stretch(factor:2.0 [a7])])]}
     Y = [note(duration:2.5 instrument:none name:c octave:4 sharp:false) note(duration:2.5 instrument:none name:d octave:4 sharp:false) note(duration:2.5 instrument:none name:e octave:5 sharp:false) note(duration:2.5 instrument:none name:f octave:8 sharp:false)
      note(duration:5.0 instrument:none name:f octave:10 sharp:false) note(duration:15.0 instrument:none name:d octave:9 sharp:false) note(duration:10.0 instrument:none name:a octave:7 sharp:false)]
   in
-     {AssertEquals {P2T X} Y 'TestStretch'}
+     {AssertListEqual X Y 'TestStretch Suceeded' 'TestStretch Failed'}
   end
 end
 
 proc {TestDrone P2T}
   local
-    X = [drone(amount:2 note:[c d e5 f8]) drone(amount:2 note:[f10 drone(amount:3 note:[d9]) drone(amount:2 note:[a7])])]
+    X = {P2T [drone(amount:2 note:[c d e5 f8]) drone(amount:2 note:[f10 drone(amount:3 note:[d9]) drone(amount:2 note:[a7])])]}
     Y = [
      note(duration:2.5 instrument:none name:c octave:4 sharp:false) note(duration:2.5 instrument:none name:d octave:4 sharp:false) note(duration:2.5 instrument:none name:e octave:5 sharp:false) note(duration:2.5 instrument:none name:f octave:8 sharp:false)
      note(duration:5.0 instrument:none name:f octave:10 sharp:false)
@@ -106,19 +146,19 @@ proc {TestDrone P2T}
      note(duration:10.0 instrument:none name:a octave:7 sharp:false) note(duration:10.0 instrument:none name:a octave:7 sharp:false)
      ]
   in
-     {AssertEquals {P2T X} Y 'TestDrone'}
+     {AssertListEqual X Y 'TestDrone Suceeded' 'TestDrone Failed'}
   end
 end
 
 proc {TestTranspose P2T}
    local
-     X = [transpose(semitones:2 [a a#4 c [e7 g10]])]
+     X = {P2T [transpose(semitones:2 [a a#4 c [a10 g#4]])]}
      Y = [
      note(duration:1.0 instrument:none name:b octave:4 sharp:false) note(duration:1.0 instrument:none name:c octave:5 sharp:false) note(duration:1.0 instrument:none name:d octave:4 sharp:false)
-     [note(duration:1.0 instrument:none name:f octave:7 sharp:true) note(duration:1.0 instrument:none name:a octave:10 sharp:false)]
+     [note(duration:1.0 instrument:none name:b octave:10 sharp:false) note(duration:1.0 instrument:none name:a octave:4 sharp:true)]
      ]
    in
-    {AssertEquals {P2T X} Y 'TestTranspose'}
+    {AssertListEqual X Y 'TestTranspose Suceeded' 'TestTranspose Failed'}
    end
 end
 
@@ -129,10 +169,10 @@ end
 
 proc {TestEmptyChords P2T}
   local
-    X = [ nil stretch(factor:2.5 nil) duration(seconds:10.0 nil) transpose(semitones:2 nil) drone(amount:10 nil)]
+    X = {P2T [ nil stretch(factor:2.5 nil) duration(seconds:10.0 nil) transpose(semitones:2 nil) drone(amount:10 nil)]}
     Y = nil
   in
-   {AssertEquals {P2T X} Y 'TestEmptyChords'}
+   {AssertListEqual X Y 'TestEmptyChords Suceeded' 'TestEmptyChords Failed'}
   end
 end
 
@@ -142,10 +182,10 @@ proc {TestP2T P2T}
    {TestIdentity P2T}
    {TestDuration P2T}
    {TestStretch P2T}
-   {TestDrone P2T}
-   {TestTranspose P2T}
-   {TestP2TChaining P2T}
-   {TestEmptyChords P2T}
+   %{TestDrone P2T}
+   %{TestTranspose P2T}
+   %{TestP2TChaining P2T}
+   %{TestEmptyChords P2T}
    {AssertEquals {P2T nil} nil 'nil partition'}
 end
 
@@ -216,9 +256,9 @@ end
 proc {Test Mix P2T}
    {Property.put print print(width:100)}
    {Property.put print print(depth:100)}
-   {System.show 'tests have started'}
+   {Browse 'tests have started'}
    {TestP2T P2T}
-   {System.show 'P2T tests have run'}
+   {Browse 'P2T tests have run'}
    %{TestMix P2T Mix}
    %{System.show 'Mix tests have run'}
    {System.show test(passed:@PassedTests total:@TotalTests)}
