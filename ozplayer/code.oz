@@ -211,7 +211,7 @@ local
        case H
        of nil then nil
        [] H1|T1 then
-          {ChordToExtended H}|{PartitionToTimedList T}
+            {ChordToExtended H}|{PartitionToTimedList T}    %append????????
        else
           {Append2 {NoteToExtended H} {PartitionToTimedList T}}
        end
