@@ -79,6 +79,8 @@ fun{Echo2 delay decay repeat music ListM}
   else
     {Echo2 delay+delay decay*decay repeat-1 music {List.append ListM Decay#{Append L{Float.toInt Delay*44100}} Music}}
   end
+          
+          %% cut !!!!!
 end
 
 
