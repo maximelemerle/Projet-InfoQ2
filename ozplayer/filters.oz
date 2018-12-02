@@ -51,7 +51,7 @@ fun {Echo Delay Decay Music}
   {Merge [1.0#Music Decay#{Append {L {Float.toInt Delay*1.0}} Music}]}
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-fun {Fade Start Out Music}
+fun {Fade Start Out Music}   % pb a la fin je pense !!!!!!!!%
    local
       fun {FadeIn Start Music Acc}
         case Music of nil then nil
@@ -73,7 +73,7 @@ fun {Fade Start Out Music}
         end
       end
    in
-      {Flatten [{FadeIn Start Music 0} {Cut Start Out Music} {FadeOut Out L {Float.toInt 44100.0*Out-1.0}}]}
+      {Flatten [{FadeIn Start Music 0} {Cut Start Out Music} {FadeOut Out L {Float.toInt 44100.0*Out-1.0}}]}  % pas cut star et out !!!!%
    end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
