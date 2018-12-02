@@ -104,8 +104,3 @@ fun {L T}
    end
 end
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-fun{crossfade seconds music1 music2}
-  {cut music1 0 ({List.length Music1}/44100)} | {Merge 1#{Fade 0 seconds {List.take music2 seconds*44100}} 1#{Fade seconds 0 {List.drop {List.length Music1}-seconds*44100)}}} | {List.drop music2 seconds*44100}
-end
