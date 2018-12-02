@@ -216,7 +216,12 @@ end
 % TEST Mix
 
 proc {TestSamples P2T Mix}
-   skip
+   local
+     X = {Mix P2T [samples([0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0])]}
+     Y = [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
+   in
+     {AssertListEqual {Normalize X} {Normalize Y} 'TestSamples Passed' 'TestSamples Failed'}
+   end
 end
 
 proc {TestPartition P2T Mix}
@@ -228,27 +233,58 @@ proc {TestWave P2T Mix}
 end
 
 proc {TestMerge P2T Mix}
-   skip
+  local
+    X = {Mix P2T [merge([1.0#samples([0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]) 0.5#samples([1.0 0.9 0.8 0.7 0.6 0.5 0.4 0.3 0.2 0.1 0.0 1.0 0.9 0.8 0.7 0.6 0.5 0.4 0.3 0.2 0.1 0.0])] ) ] }
+    Y = [0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1.0 0.5 0.45 0.4 0.35 0.3 0.25 0.2 0.15 0.1 0.05 0.0]
+  in
+    {AssertListEqual {Normalize X} {Normalize Y} 'TestMerge Passed' 'TestMerge Failed'}
+  end
 end
 
 proc {TestReverse P2T Mix}
-   skip
+    local
+      X = {Mix P2T [reverse(samples([0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]))]}
+      Y = [1.0 0.9 0.8 0.7 0.6 0.5 0.4 0.3 0.2 0.1 0.0]
+    in
+      {AssertListEqual {Normalize X} {Normalize Y} 'TestReverse Passed' 'TestReverse Failed'}
+    end
 end
 
 proc {TestRepeat P2T Mix}
-   skip
+    local
+      X = {Mix P2T [repeat(amount:2 samples([0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]))]}
+      Y = [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
+    in
+      {AssertListEqual {Normalize X} {Normalize Y} 'TestRepeat Passed' 'TestRepeat Failed'}
+    end
 end
 
 proc {TestLoop P2T Mix}
-   skip
+    local
+      X = {Mix P2T [loop(duration:1.0/1000.0 samples([0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]))]}
+      Y = [0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 0.1 0.2 0.3 0.4]
+    in
+      {AssertListEqual {Normalize X} {Normalize Y} 'TestLoop Passed' 'TestLoop Failed'}
+    end
 end
 
 proc {TestClip P2T Mix}
-   skip
+    local
+      X = {Mix P2T [clip(low:~1.0 high:1.0 samples([~1.5 ~1.4 ~1.3 ~1.2 ~1.1 ~1.0 ~0.9 ~0.8 ~0.7 ~0.6 ~0.5 ~0.4 ~0.3 ~0.2 ~0.1 0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5]))]}
+      Y = [~1.0 ~1.0 ~1.0 ~1.0 ~1.0 ~1.0 ~0.9 ~0.8 ~0.7 ~0.6 ~0.5 ~0.4 ~0.3 ~0.2 ~0.1 0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.0 1.0 1.0 1.0 1.0]
+    in
+      {AssertListEqual {Normalize X} {Normalize Y} 'TestClip Passed' 'TestClip Failed'}
+    end
 end
 
 proc {TestEcho P2T Mix}
-   skip
+    local
+      X = {Mix P2T [echo(delay:1.0/10000.0 decay:0.5 samples([0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5]))]}
+                                                                            %[0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5]
+      Y =                                                  [0.0 0.1 0.2 0.3 0.4 0.55 0.7 0.85 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 0.5 0.5 0.5 0.5]
+    in
+      {AssertListEqual {Normalize X} {Normalize Y} 'TestEcho Passed' 'TestEcho Failed'}
+    end
 end
 
 proc {TestFade P2T Mix}
@@ -256,20 +292,25 @@ proc {TestFade P2T Mix}
 end
 
 proc {TestCut P2T Mix}
-   skip
+    local
+      X = {Mix P2T [cut(start:1.0/10000.0 finish:2.0/10000.0 samples([0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]))]}
+      Y = [0.4 0.5 0.6 0.7]
+    in
+      {AssertListEqual {Normalize X} {Normalize Y} 'TestCut Passed' 'TestCut Failed'}
+    end
 end
 
 proc {TestMix P2T Mix}
    {TestSamples P2T Mix}
-   {TestPartition P2T Mix}
-   {TestWave P2T Mix}
+   %{TestPartition P2T Mix}
+   %{TestWave P2T Mix}
    {TestMerge P2T Mix}
    {TestReverse P2T Mix}
    {TestRepeat P2T Mix}
    {TestLoop P2T Mix}
    {TestClip P2T Mix}
    {TestEcho P2T Mix}
-   {TestFade P2T Mix}
+   %{TestFade P2T Mix}
    {TestCut P2T Mix}
    {AssertEquals {Mix P2T nil} nil 'nil music'}
 end
@@ -280,9 +321,9 @@ proc {Test Mix P2T}
    {Property.put print print(width:100)}
    {Property.put print print(depth:100)}
    {Browse 'tests have started'}
-   {TestP2T P2T}
-   {Browse 'P2T tests have run'}
-   %{TestMix P2T Mix}
-   %{System.show 'Mix tests have run'}
+   %{TestP2T P2T}
+   %{Browse 'P2T tests have run'}
+   {TestMix P2T Mix}
+   {System.show 'Mix tests have run'}
    {System.show test(passed:@PassedTests total:@TotalTests)}
 end

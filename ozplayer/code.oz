@@ -90,7 +90,7 @@ local
        [] H|T then
           case H
           of H1|T1 then
-             {Stretch {PartitionToTimedList H} Facteur}|{Stretch T Facteur}%{Append {Stretch {PartitionToTimedList H} Facteur} {Stretch T Facteur}}
+             {Stretch {PartitionToTimedList H} Facteur}|{Stretch T Facteur}
           [] silence(duration:D) then
              silence(duration:D*Facteur)|{Stretch T Facteur}
          else
@@ -107,7 +107,7 @@ local
    fun {Drone NoteOrChord Amount}
      if Amount<1 then nil
      else
-      NoteOrChord|{Drone NoteOrChord Amount-1} %{PartitionToTimedList NoteOrChord}
+      NoteOrChord|{Drone NoteOrChord Amount-1}
      end
    end
 
@@ -176,7 +176,7 @@ local
             case H
             of nil then nil
             [] H1|T1 then
-                {PartitionToTimedList [transpose(semitones: Integer H)]}|{Transpose2 Integer T}        %{PartitionToTimedList H}|{Transpose2 Integer T}
+                {PartitionToTimedList [transpose(semitones:Integer H)]}|{Transpose2 Integer T}
             [] silence(duration:D) then
                 H|{Transpose2 Integer T}
             else
@@ -208,7 +208,7 @@ local
        case H
        of nil then nil
        [] H1|T1 then
-          {PartitionToTimedList H}|{PartitionToTimedList T}    %append????????
+          {PartitionToTimedList H}|{PartitionToTimedList T}
        [] duration(seconds:S L) then
           {Append {Duration {PartitionToTimedList L} S} {PartitionToTimedList T}}
        [] stretch(factor:F L) then
@@ -254,11 +254,11 @@ local
             [] merge(MusicsList) then {Merge {MusicToList MusicsList P2T}}|{Mix2 P2T T}
             else {Filtre P2T Music}|{Mix2 P2T T}
             end
-            [] samples(Samples) then Samples
-            [] partition(Partition) then {Echantillon {P2T Partition}}
-            [] wave(File) then {Project.load File}
-            [] merge(MusicsList) then {Merge {MusicToList MusicsList P2T}}
-            else {Filtre P2T Music}
+          [] samples(Samples) then Samples
+          [] partition(Partition) then {Echantillon {P2T Partition}}
+          [] wave(File) then {Project.load File}
+          [] merge(MusicsList) then {Merge {MusicToList MusicsList P2T}}
+          else {Filtre P2T Music}
           end
         end
       in
@@ -274,6 +274,16 @@ local
    fun {Filtre P2T Music}
       case Music
       of nil then nil
+      [] H|T then
+        case H
+        of reverse(Music) then                 {Reverse {Mix P2T Music}}|{Mix P2T T}
+        [] repeat(amount:Integer Music) then   {Repeat Integer {Mix P2T Music}}|{Mix P2T T}
+        [] loop(duration:Duration Music) then  {Loop Duration {Mix P2T Music}}|{Mix P2T T}
+        [] clip(low:Low high:High Music) then  {Clip Low High {Mix P2T Music}}|{Mix P2T T}
+        [] echo(delay:Delay decay:Decay Music) then {Echo Delay Decay {Mix P2T Music}}|{Mix P2T T}
+        [] fade(start:Start out:Out Music) then   {Fade Start Out {Mix P2T Music}}|{Mix P2T T}
+        [] cut(start:Start finish:End Music) then {Cut Start End {Mix P2T Music}}|{Mix P2T T}
+        end
       [] reverse(Music) then                 {Reverse {Mix P2T Music}}
       [] repeat(amount:Integer Music) then   {Repeat Integer {Mix P2T Music}}
       [] loop(duration:Duration Music) then  {Loop Duration {Mix P2T Music}}
@@ -304,7 +314,7 @@ local
                   X = Constant*{Int.toFloat I}
                in
                   {Float.sin X}/2.0|{Echantillon2 Note Constant I+1}
-             end                                                                  %{Echantillon2 Note Hauteur I}
+             end
            else nil
            end
          end
@@ -416,12 +426,12 @@ fun {Loop Duration Music}
     Taille = {List.length Music}
     X Y
   in
-    if Taille<Duration then   % Si la musique dépasse la duree on calcule le nombre de fois et la duree du dernier bout a rajouter
-      X = Duration mod Taille
-      Y = Duration div Taille
-      {Flatten {Repeat Y Music}|{List.take Music X*44100}}
+    if Taille<{Float.toInt Duration*44100.0} then   % Si la musique dépasse la duree on calcule le nombre de fois et la duree du dernier bout a rajouter
+      X = {Float.toInt Duration*44100.0} mod Taille
+      Y = {Float.toInt Duration*44100.0} div Taille
+      {Flatten {Repeat Y Music}|{List.take Music X}}
     else
-      {List.take Music X*44100}
+      {List.take Music {Float.toInt Duration*44100.0}}
     end
   end
 end
@@ -498,8 +508,9 @@ fun {Cut Start Finish Music}
   else
     local
       X = {List.drop Music {Float.toInt Start*44100.0}}
+      T = Finish-Start
     in
-      {List.take X {Float.toInt Finish*44100.0}}
+      {List.take X {Float.toInt T*44100.0}}
     end
   end
 end
@@ -523,13 +534,13 @@ end
    Start
 
    % Uncomment next line to insert your tests.
-   %\insert 'tests.oz'
+   \insert 'tests.oz'
    % !!! Remove this before submitting.
 in
    Start = {Time}
 
    % Uncomment next line to run your tests.
-   %{Test Mix PartitionToTimedList}
+   {Test Mix PartitionToTimedList}
 
    % Add variables to this list to avoid "local variable used only once"
    % warnings.
@@ -537,7 +548,7 @@ in
 
    % Calls your code, prints the result and outputs the result to `out.wav`.
    % You don't need to modify this.
-   {Browse {Project.run Mix PartitionToTimedList Music 'out.wav'}}
+   %{Browse {Project.run Mix PartitionToTimedList Music 'out.wav'}}
    %{Browse {List.length {Mix PartitionToTimedList Music}}}
    %{Browse {PartitionToTimedList Music}}
    %{Browse {List.length {Echantillon {PartitionToTimedList [duration(seconds:5.0 [a])]}}.1}}
