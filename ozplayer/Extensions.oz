@@ -1,5 +1,3 @@
-
-
 declare
 
 
@@ -72,3 +70,15 @@ fun{SampOut dureenote samples}
     {List.drop {List.take samples 44100*dureenote - 8820} 8820} 
   else
     {List.drop {List.take samples 44100*dureenote - 8820*dureenote} 8820*dureenote}
+        
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+fun{Echo2 delay decay repeat music ListM}
+  if repeat <= 0 then    %!!!!! aux negations autres fonctions !!!!!
+    {Merge ListM}
+  else
+    {Echo2 delay+delay decay*decay repeat-1 music {List.append ListM Decay#{Append L{Float.toInt Delay*44100}} Music}}
+  end
+end
+
+
