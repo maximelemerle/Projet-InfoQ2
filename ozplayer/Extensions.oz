@@ -4,7 +4,7 @@ declare
 fun{Lissage partition samples}   %%% !!! appeler lissage et mix de partition    !!!!! chord !!!!!
   case partition 
   of nil then nil 
-  [H|T] then 
+  [] H|T then 
     {LissIn H.duree {SampIn H.duree samples} -4410} | {SampMid H.duree samples} | {LissOut H.duree {Sampout H.duree samples} -4410}| {Lissage T {List.drop samples 44100*H.duree}}
   end
 end
@@ -82,5 +82,23 @@ fun{Echo2 delay decay repeat music ListM}
           
           %% cut !!!!!
 end
+        
+ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+fun{LowPass samples a b c d e f}
+  case samples of nil 
+  then nil 
+  [] H|T then
+    {Lowpass2 H b c d e f} | {LowPass T a H b c d e}
+  end
+end
+
+fun{LowPass2 a b c d e f}
+  a*0.1169 + b*0.1746 + c*0.2084 + d*0.2084 + e*0.1746 + f*0.1169
+end
+
+
+% appeler {cut {LowPass samples 0 0 0 0 0 0}}
 
 
