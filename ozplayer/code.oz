@@ -176,7 +176,7 @@ local
             case H
             of nil then nil
             [] H1|T1 then
-                {PartitionToTimedList [transpose(semitones:Integer H)]}|{Transpose2 Integer T}
+                {PartitionToTimedList [transpose(semitones:Integer {PartitionToTimedList H})]}|{Transpose2 Integer T}
             [] silence(duration:D) then
                 H|{Transpose2 Integer T}
             else
