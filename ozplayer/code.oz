@@ -463,7 +463,7 @@ fun {Fade Start Out Music}
         end
       end
    in
-      [{FadeIn Start Music 0} {Cut Start Out Music} {FadeOut Out L {Float.toInt 44100.0*Out-1.0}}]
+      {Flatten [{FadeIn Start Music 0} {Cut Start Out Music} {FadeOut Out L {Float.toInt 44100.0*Out-1.0}}]}
    end
 end
 
