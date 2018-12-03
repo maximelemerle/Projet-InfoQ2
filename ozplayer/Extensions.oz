@@ -1,53 +1,6 @@
+
+
 declare
-
-
-fun{Lissage Note Samples}   %%% !!! appeler lissage et mix de partition    !!!!! chord !!!!!
-    local
-      Length = {Min 8820.0 0.2*Note.duration*44100.0}
-      OutLength = Note.duration*44100.0-Length
-      FrontSection = {List.take Samples {Float.toInt Length}}
-      MidSection = {List.drop {List.take Samples {Float.toInt OutLength}} {Float.toInt Length}}
-      EndSection = {List.drop Samples {Float.toInt OutLength}}
-    in
-      {LissIn Length FrontSection}|MidSection|{LissOut Length EndSection}|
-    end
-end
-
-fun {LissIn Length Samples}
-  local
-    LengthSquared = Length*Length
-    fun{Liss Length Samples LengthSquared Acc}  % apeler avec note.duree
-      case samples
-      of nil then nil
-      [] H|T then
-          if Acc<0 then
-            ~H*{Int.toFloat Acc*Acc}/LengthSquared + 1|{Liss Length T Acc+1}
-          else nil
-          end
-      end
-    end
-  in
-    {LissIn Length Samples LengthSquared {Float.toInt ~Length}}
-  end
-end
-
-fun {LissOut Length Samples}
-  local
-    LengthSquared = Length*Length
-    fun{Liss Length Samples LengthSquared Acc}  % apeler avec note.duree
-      case samples
-      of nil then nil
-      [] H|T then
-          if Acc<Length then
-            ~H*{Int.toFloat Acc*Acc}/LengthSquared + 1|{Liss Length T Acc+1}
-          else nil
-          end
-      end
-    end
-  in
-    {LissOut Length Samples LengthSquared 0}
-  end
-end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
