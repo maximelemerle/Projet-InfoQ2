@@ -1,3 +1,5 @@
+
+
 declare
 
 
@@ -9,7 +11,8 @@ fun{Lissage partition samples}   %%% !!! appeler lissage et mix de partition    
   end
 end
 
-                 
+                    
+
 
 fun{LissIn dureenote samplesIn Acc}  % apeler avec note.duree
   case samplesIn of nil then nil
@@ -20,7 +23,7 @@ fun{LissIn dureenote samplesIn Acc}  % apeler avec note.duree
       else nil
     else 
       if Acc < 4410*dureenote then 
-        H * ((atan(3*(Acc/4410*dureenote))/2) +1/2) | {LissIN T Acc+1} 
+        H * ((atan(3*(Acc/(4410*dureenote))/2) +1/2) | {LissIN T Acc+1} 
       else
         nil
       end
@@ -59,18 +62,21 @@ end
 
 fun{SampMid dureenote samples}
   if dureenote >= 1 then
-    {List.drop {List.take samples 44100*dureenote} 8820} 
+    {List.drop {List.take samples 44100*dureenote -8820} 8820} 
   else
-    {List.drop {List.take samples 44100*dureenote} 8820*dureenote} 
+    {List.drop {List.take samples 44100*dureenote -8820*dureenote} 8820*dureenote} 
   end
 end
 
 fun{SampOut dureenote samples}
   if dureenote >= 1 then 
-    {List.drop {List.take samples 44100*dureenote - 8820} 8820} 
+    {List.drop 44100*dureenote - 8820} 
   else
-    {List.drop {List.take samples 44100*dureenote - 8820*dureenote} 8820*dureenote}
-        
+    {List.drop 44100*dureenote - 8820*dureenote}
+  end
+end
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 fun{Echo2 delay decay repeat music ListM}
