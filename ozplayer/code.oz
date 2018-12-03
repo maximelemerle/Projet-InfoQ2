@@ -225,15 +225,6 @@ local
      end
    end
 
-   fun {Append2 L1 L2}
-      case L1
-      of nil then nil
-      [] H|T then
-          {Append L1 L2}
-      else
-          {Append L1|nil L2}
-      end
-   end
 
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -241,64 +232,39 @@ local
 
    % Recois une musique et une fonction qui satisfait la spécification de PartitionToTimedList en argument
    % Retourne une liste d echantillons
+   % Les arguments des filtres sont des musiques deja echantilonnee
    fun {Mix P2T Music}
       local
-        fun {Mix2 P2T Music}
+        fun {Mix2 P2T Music Lissage}
           case Music
           of nil then nil
           [] H|T then
             case H
-            of samples(Samples) then Samples|{Mix2 P2T T}
-            [] partition(Partition) then {Echantillon {P2T Partition}}|{Mix2 P2T T}
-            [] wave(File) then {Project.load File}|{Mix2 P2T T}
-            [] merge(MusicsList) then {Merge {MusicToList MusicsList P2T}}|{Mix2 P2T T}
-            else {Filtre P2T Music}|{Mix2 P2T T}
+            of samples(Samples) then Samples|{Mix2 P2T T Lissage}
+            [] partition(Partition) then {Echantillon {P2T Partition} Lissage}|{Mix2 P2T T Lissage}
+            [] wave(File) then {Project.load File}|{Mix2 P2T T Lissage}
+            [] merge(MusicsList) then {Merge {MusicToList MusicsList P2T}}|{Mix2 P2T T Lissage}
+            [] reverse(Music) then {Reverse {Mix P2T Music}}|{Mix2 P2T T Lissage}
+            [] repeat(amount:Integer Music) then {Repeat Integer {Mix P2T Music}}|{Mix2 P2T T Lissage}
+            [] loop(duration:Duration Music) then {Loop Duration {Mix P2T Music}}|{Mix2 P2T T Lissage}
+            [] clip(low:Low high:High Music) then {Clip Low High {Mix P2T Music}}|{Mix2 P2T T Lissage}
+            [] echo(delay:Delay decay:Decay Music) then {Echo Delay Decay {Mix P2T Music}}|{Mix2 P2T T Lissage}
+            [] fade(start:Start out:Out Music) then {Fade Start Out {Mix P2T Music}}|{Mix2 P2T T Lissage}
+            [] cut(start:Start finish:End Music) then {Cut Start End {Mix P2T Music}}|{Mix2 P2T T Lissage}
             end
-          [] samples(Samples) then Samples
-          [] partition(Partition) then {Echantillon {P2T Partition}}
-          [] wave(File) then {Project.load File}
-          [] merge(MusicsList) then {Merge {MusicToList MusicsList P2T}}
-          else {Filtre P2T Music}
           end
         end
       in
-        {Clip ~1.0 1.0 {Flatten {Mix2 P2T Music}}}
+        {Clip ~1.0 1.0 {Flatten {Mix2 P2T Music true}}}
       end
       %{Project.readFile 'wave/animaux/cow.wav'}
    end
 
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-   % Idem Mix...
-   % Apelle une des fonction filtre     !!! Les arguments des filtres sont des musiques deja echantilonnee !!!
-   fun {Filtre P2T Music}
-      case Music
-      of nil then nil
-      [] H|T then
-        case H
-        of reverse(Music) then                 {Reverse {Mix P2T Music}}|{Mix P2T T}
-        [] repeat(amount:Integer Music) then   {Repeat Integer {Mix P2T Music}}|{Mix P2T T}
-        [] loop(duration:Duration Music) then  {Loop Duration {Mix P2T Music}}|{Mix P2T T}
-        [] clip(low:Low high:High Music) then  {Clip Low High {Mix P2T Music}}|{Mix P2T T}
-        [] echo(delay:Delay decay:Decay Music) then {Echo Delay Decay {Mix P2T Music}}|{Mix P2T T}
-        [] fade(start:Start out:Out Music) then   {Fade Start Out {Mix P2T Music}}|{Mix P2T T}
-        [] cut(start:Start finish:End Music) then {Cut Start End {Mix P2T Music}}|{Mix P2T T}
-        end
-      [] reverse(Music) then                 {Reverse {Mix P2T Music}}
-      [] repeat(amount:Integer Music) then   {Repeat Integer {Mix P2T Music}}
-      [] loop(duration:Duration Music) then  {Loop Duration {Mix P2T Music}}
-      [] clip(low:Low high:High Music) then  {Clip Low High {Mix P2T Music}}
-      [] echo(delay:Delay decay:Decay Music) then {Echo Delay Decay {Mix P2T Music}}
-      [] fade(start:Start out:Out Music) then   {Fade Start Out {Mix P2T Music}}
-      [] cut(start:Start finish:End Music) then {Cut Start End {Mix P2T Music}}
-      end
-   end
-
-   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
    % Prend une partition composee uniquement de note etendue en argument
    % Renvoie la liste d echantillon correspondant a la partition
-   fun {Echantillon Partition}
+   fun {Echantillon Partition Boolean}
        local
          fun {HauteurPow Note}   % trouve la hauteur de la note
              case Note
@@ -324,9 +290,17 @@ local
          [] H|T then
             case H
             of H1|T1 then
-              {Merge {ListToListWithIntensitiesOne {Echantillon H}}}|{Echantillon T}
+              if Boolean then
+                {Lissage H1 {Merge {ListToListWithIntensitiesOne {Echantillon H Boolean}}}}|{Echantillon T Boolean}
+              else
+                {Merge {ListToListWithIntensitiesOne {Echantillon H Boolean}}}|{Echantillon T Boolean}
+              end
             else
-              {Echantillon2 H {HauteurPow H}*H.duration*0.06268937721 1}|{Echantillon T}
+              if Boolean then
+                 {Lissage H {Echantillon2 H {HauteurPow H}*H.duration*0.06268937721 1}}|{Echantillon T Boolean}
+              else
+                 {Echantillon2 H {HauteurPow H}*H.duration*0.06268937721 1}|{Echantillon T Boolean}
+              end
             end
          end
        end
@@ -459,7 +433,7 @@ end
 % Recois un delai une intensite (dacay) et une musique
    % Cree un double de la musique et merge avec la musique de depart
 fun {Echo Delay Decay Music}
-  {Merge [1.0#Music Decay#{Append {L {Float.toInt Delay*44100.0}} Music}]}
+  {Merge [1.0#Music Decay#{Append {ListeNulle {Float.toInt Delay*44100.0}} Music}]}
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -489,7 +463,7 @@ fun {Fade Start Out Music}
         end
       end
    in
-      {Flatten [{FadeIn Start Music 0} {Cut Start Out Music} {FadeOut Out L {Float.toInt 44100.0*Out-1.0}}]}
+      [{FadeIn Start Music 0} {Cut Start Out Music} {FadeOut Out L {Float.toInt 44100.0*Out-1.0}}]
    end
 end
 
@@ -503,7 +477,7 @@ fun {Cut Start Finish Music}
        L = {List.drop Music {Float.toInt Start*44100.0}}
        Length = 44100.0*(Finish-Start)-{Int.toFloat {List.length L}}
     in
-      {Flatten [L {L {Float.toInt Length}}]}
+      {Flatten [L {ListeNulle {Float.toInt Length}}]}
     end
   else
     local
@@ -519,18 +493,68 @@ end
 
 % Recois une taille en argument
 % Cree une liste de 0 de taille T
-fun {L T}
+fun {ListeNulle T}
    if T==0 then
       nil
    else
-      0.0|{L T-1}
+      0.0|{ListeNulle T-1}
    end
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+fun{Lissage Note Samples}
+    local
+      Length = {Min 8820.0 0.2*Note.duration*44100.0}
+      OutLength = Note.duration*44100.0-Length
+      FrontSection = {List.take Samples {Float.toInt Length}}
+      MidSection = {List.drop {List.take Samples {Float.toInt OutLength}} {Float.toInt Length}}
+      EndSection = {List.drop Samples {Float.toInt OutLength}}
+    in
+      {Flatten {LissIn Length FrontSection}|MidSection|{LissOut Length EndSection}}
+    end
+end
 
-   Music = {Project.load 'Interstellar.dj.oz'}
+fun {LissIn Length Samples}
+  local
+    LengthSquared = Length*Length
+    fun{LissIn2 Samples LengthSquared Acc}  % apeler avec note.duree
+      case Samples
+      of nil then nil
+      [] H|T then
+          if Acc=<0 then
+            H*(~{Int.toFloat Acc*Acc}/LengthSquared + 1.0)|{LissIn2 T LengthSquared Acc+1}
+          else nil
+          end
+      end
+    end
+  in
+    {LissIn2 Samples LengthSquared {Float.toInt ~Length}}
+  end
+end
+
+fun {LissOut Length Samples}
+  local
+    LengthSquared = Length*Length
+    fun{LissOut2 Length Samples LengthSquared Acc}  % apeler avec note.duree
+      case Samples
+      of nil then nil
+      [] H|T then
+          if Acc=<Length then
+            H*(~{Int.toFloat Acc*Acc}/LengthSquared + 1.0)|{LissOut2 Length T LengthSquared Acc+1}
+          else nil
+          end
+      end
+    end
+  in
+    {LissOut2 {Float.toInt Length} Samples LengthSquared 0}
+  end
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+   Music = {Project.load 'joy.dj.oz'}
    Start
 
    % Uncomment next line to insert your tests.
@@ -550,7 +574,7 @@ in
    % You don't need to modify this.
    %{Browse {Project.run Mix PartitionToTimedList Music 'out.wav'}}
    %{Browse {List.length {Mix PartitionToTimedList Music}}}
-   %{Browse {PartitionToTimedList Music}}
+   %{Browse {PartitionToTimedList [[note(duration:1.0 instrument:none name:a octave:4 sharp:false) note(duration:2.0 instrument:none name:b octave:5 sharp:false)]]}}
    %{Browse {List.length {Echantillon {PartitionToTimedList [duration(seconds:5.0 [a])]}}.1}}
    %{Browse Music}
 
