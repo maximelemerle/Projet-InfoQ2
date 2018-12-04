@@ -2,16 +2,18 @@
 
 declare
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-fun{Echo2 delay decay repeat music ListM}
-  if repeat <= 0 then    %!!!!! aux negations autres fonctions !!!!!
-    {Merge ListM}
-  else
-    {Echo2 delay+delay decay*decay repeat-1 music {List.append ListM Decay#{Append L{Float.toInt Delay*44100}} Music}}
+fun {Echo2 Delay Decay Repeat Music}
+  local
+    fun {Echo22 Delay Decay Repeat Music L Acc}
+      if Repeat<1 then
+        {Merge L}
+      else
+        {Echo22 Delay Decay Repeat-1 Music L|{Pow Decay Acc}#{Append {ListeNulle {Float.toInt Delay*Acc*44100.0}} Music} Acc+1}
+      end
+    end
+  in
+    {Echo22 Delay Decay Repeat Music nil 1}
   end
-
-          %% cut !!!!!
 end
 
 

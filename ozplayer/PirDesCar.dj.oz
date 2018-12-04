@@ -16,9 +16,10 @@ local
   ]
 
 
-  Main2 = [silence(duration:0.4) silence(duration:0.6) duration(seconds:0.2 [f3]) silence(duration:1.2) duration(seconds:0.2 [f]) duration(seconds:0.2 [g])
+  Main2 = [
+  silence(duration:0.4) silence(duration:0.6) duration(seconds:0.2 [f3]) silence(duration:1.2) duration(seconds:0.2 [f]) duration(seconds:0.2 [g])
   duration(seconds:0.4 [a3]) duration(seconds:0.4 [c]) silence(duration:0.8) duration(seconds:0.2 [f3]) silence(duration:0.6)
-  duration(seconds:0.6 [a#3]) duration(seconds:0.2 [a#3]) silence(duration:0.8) duration(seconds:0.4 [c]) silence(duration:2.8)
+  duration(seconds:0.6 [a#3])  silence(duration:0.001) duration(seconds:0.2 [a#3]) silence(duration:0.8) duration(seconds:0.4 [c]) silence(duration:2.8)
   silence(duration:0.6) duration(seconds:0.6 [a3]) duration(seconds:0.4 [d]) duration(seconds:0.7 [d]) silence(duration:0.1)
   silence(duration:0.4) duration(seconds:0.4 [[d f]]) silence(duration:1.6)
   duration(seconds:0.4 [d]) duration(seconds:0.4 [d]) silence(duration:1.6)
@@ -47,7 +48,7 @@ local
 in
    % This is a music :)
    %[wave('wave/animals/cow.wav')]
-   [ merge( [0.2#[partition(Main1)] 0.2#[partition(Main2)] 0.2#[partition(Main3)] 0.1#[partition(Main4)] 0.1#[partition(Main5)]] ) ] %0.25#[wave('FinalPart3.wav')] 0.25#[wave('FinalPart4.wav')] 0.5#[partition(Main3)] 0.2# 0.2#[partition(Main4)] 0.2#[partition(Main5)]
+   [ merge( [0.2#[partition(Main1)] 0.2#[partition(Main2)] 0.2#[partition(Main3)] 0.05#[partition(Main4)] 0.05#[partition(Main5)]] ) ] %0.25#[wave('FinalPart3.wav')] 0.25#[wave('FinalPart4.wav')] 0.5#[partition(Main3)] 0.2# 0.2#[partition(Main4)] 0.2#[partition(Main5)]
    %[partition(Main1)]
    %[merge([0.5#[wave('FinalPart1.wav')] 0.5#[wave('FinalPart2.wav')] ])]
 end

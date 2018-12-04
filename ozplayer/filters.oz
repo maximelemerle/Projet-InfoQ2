@@ -103,4 +103,3 @@ fun {L T}
       0.0|{L T-1}
    end
 end
-
