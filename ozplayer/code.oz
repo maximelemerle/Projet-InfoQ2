@@ -90,7 +90,7 @@ local
        [] H|T then
           case H
           of H1|T1 then
-             {Stretch {PartitionToTimedList H} Facteur}|{Stretch T Facteur}
+             {Stretch H Facteur}|{Stretch T Facteur}
           [] silence(duration:D) then
              silence(duration:D*Facteur)|{Stretch T Facteur}
          else
@@ -242,7 +242,7 @@ local
             case H
             of samples(Samples) then Samples|{Mix2 P2T T Lissage}
             [] partition(Partition) then {Echantillon {P2T Partition} Lissage}|{Mix2 P2T T Lissage}
-            [] wave(File) then {Project.load File}|{Mix2 P2T T Lissage}
+            [] wave(File) then {Project.readFile File}|{Mix2 P2T T Lissage}
             [] merge(MusicsList) then {Merge {MusicToList MusicsList P2T}}|{Mix2 P2T T Lissage}
             [] reverse(Music) then {Reverse {Mix P2T Music}}|{Mix2 P2T T Lissage}
             [] repeat(amount:Integer Music) then {Repeat Integer {Mix P2T Music}}|{Mix2 P2T T Lissage}
@@ -251,28 +251,29 @@ local
             [] echo(delay:Delay decay:Decay Music) then {Echo Delay Decay {Mix P2T Music}}|{Mix2 P2T T Lissage}
             [] fade(start:Start out:Out Music) then {Fade Start Out {Mix P2T Music}}|{Mix2 P2T T Lissage}
             [] cut(start:Start finish:End Music) then {Cut Start End {Mix P2T Music}}|{Mix2 P2T T Lissage}
+            else nil
             end
+          else nil
           end
         end
       in
         {Clip ~1.0 1.0 {Flatten {Mix2 P2T Music true}}}
       end
-      %{Project.readFile 'wave/animaux/cow.wav'}
    end
 
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
    % Prend une partition composee uniquement de note etendue en argument
    % Renvoie la liste d echantillon correspondant a la partition
-   fun {Echantillon Partition Boolean}
+   fun {Echantillon Partition ExtensionLissage}
        local
          fun {HauteurPow Note}   % trouve la hauteur de la note
-             case Note
-             of silence(duration:D) then
-                0.0
-             else
+             %case Note
+             %of silence(duration:D) then
+             %  0.0
+             %else
                 {Pow 2.0 {Int.toFloat {GetRow Note}+{GetColumn Note.octave}*12-69}/12.0}
-             end
+             %end
          end
          fun {Echantillon2 Note Constant I} % Parcours la partition  Constant = 2^h/12 * Note.duration * 2pi * f / 44100  !!!!!!!!!!!!!!!OPTI!!!!!!!!!!!!!!!!
            if {Int.toFloat I}=<44100.0*Note.duration then
@@ -290,28 +291,22 @@ local
          [] H|T then
             case H
             of H1|T1 then
-              if Boolean then
-                {Lissage H1 {Merge {ListToListWithIntensitiesOne {Echantillon H Boolean}}}}|{Echantillon T Boolean}
+              if ExtensionLissage then
+                {Lissage H1 {Merge {ListToListWithIntensities 1.0/{Int.toFloat {List.length H}} {Echantillon H ExtensionLissage}}}}|{Echantillon T ExtensionLissage}
               else
-                {Merge {ListToListWithIntensitiesOne {Echantillon H Boolean}}}|{Echantillon T Boolean}
+                {Merge {ListToListWithIntensities 1.0/{Int.toFloat {List.length H}} {Echantillon H ExtensionLissage}}}|{Echantillon T ExtensionLissage}
               end
+            [] silence(duration:D) then
+                {ListeNulle {Float.toInt D*44100.0}}|{Echantillon T ExtensionLissage}
             else
-              if Boolean then
-                 {Lissage H {Echantillon2 H {HauteurPow H}*H.duration*0.06268937721 1}}|{Echantillon T Boolean}
+              if ExtensionLissage then
+                 {Lissage H {Echantillon2 H {HauteurPow H}*H.duration*0.06268937721/H.duration 1}}|{Echantillon T ExtensionLissage}
               else
-                 {Echantillon2 H {HauteurPow H}*H.duration*0.06268937721 1}|{Echantillon T Boolean}
+                 {Echantillon2 H {HauteurPow H}*H.duration*0.06268937721/H.duration 1}|{Echantillon T ExtensionLissage}
               end
             end
          end
        end
-   end
-
-   fun {ListToListWithIntensitiesOne L}   % MASKIM TU DIRRAS A QUOI SERT CETRTE MERDE TOI MEME
-     case L
-     of nil then nil
-     [] H|T then
-       1.0#H|{ListToListWithIntensitiesOne T}
-     end
    end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -328,6 +323,15 @@ local
            Facteur#{Mix P2T Music}|{MusicToList T P2T}
         end
       end
+   end
+
+   % Meme que MusicToList mais permet de choisir un facteur, et H est deja samples
+   fun {ListToListWithIntensities Facteur L}
+     case L
+     of nil then nil
+     [] H|T then
+       Facteur#H|{ListToListWithIntensities Facteur T}
+     end
    end
 
    fun {Merge MusicsList}
@@ -554,17 +558,19 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-   Music = {Project.load 'joy.dj.oz'}
+   Music = {Project.load 'PirDesCar.dj.oz'}
    Start
 
    % Uncomment next line to insert your tests.
-   \insert 'tests.oz'
+   %\insert 'tests.oz'
    % !!! Remove this before submitting.
 in
    Start = {Time}
 
+   {Property.put print print(width:1000)}
+   {Property.put print print(depth:1000)}
    % Uncomment next line to run your tests.
-   {Test Mix PartitionToTimedList}
+   %{Test Mix PartitionToTimedList}
 
    % Add variables to this list to avoid "local variable used only once"
    % warnings.
@@ -572,7 +578,7 @@ in
 
    % Calls your code, prints the result and outputs the result to `out.wav`.
    % You don't need to modify this.
-   %{Browse {Project.run Mix PartitionToTimedList Music 'out.wav'}}
+   {Browse {Project.run Mix PartitionToTimedList Music 'FinalPartTest.wav'}}
    %{Browse {List.length {Mix PartitionToTimedList Music}}}
    %{Browse {PartitionToTimedList [[note(duration:1.0 instrument:none name:a octave:4 sharp:false) note(duration:2.0 instrument:none name:b octave:5 sharp:false)]]}}
    %{Browse {List.length {Echantillon {PartitionToTimedList [duration(seconds:5.0 [a])]}}.1}}

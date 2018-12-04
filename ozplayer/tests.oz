@@ -229,7 +229,12 @@ proc {TestPartition P2T Mix}
 end
 
 proc {TestWave P2T Mix}
-   skip
+    local
+      X = {Mix P2T [wave('wave/animals/cow.wav')] } % a comparer a ?....
+      Y = {Mix P2T [wave('wave/animals/cow.wav')] }
+    in
+      {AssertListEqual {Normalize X} {Normalize Y} 'TestWave Passed' 'TestWave Failed'}
+    end
 end
 
 proc {TestMerge P2T Mix}
