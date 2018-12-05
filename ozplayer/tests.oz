@@ -219,8 +219,11 @@ proc {TestSamples P2T Mix}
    local
      X = {Mix P2T [samples([0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0])]}
      Y = [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
+     X2 = {Mix P2T [samples([1.0 1.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0])]}
+     Y2 = [1.0 1.0 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
    in
      {AssertListEqual {Normalize X} {Normalize Y} 'TestSamples Passed' 'TestSamples Failed'}
+     {AssertListEqual {Normalize X2} {Normalize Y2} 'TestSamples Passed' 'TestSamples Failed'}
    end
 end
 
@@ -241,8 +244,20 @@ proc {TestMerge P2T Mix}
   local
     X = {Mix P2T [merge([1.0#[samples([0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0])] 0.5#[samples([1.0 0.9 0.8 0.7 0.6 0.5 0.4 0.3 0.2 0.1 0.0 1.0 0.9 0.8 0.7 0.6 0.5 0.4 0.3 0.2 0.1 0.0])]] ) ] }
     Y = [0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1.0 0.5 0.45 0.4 0.35 0.3 0.25 0.2 0.15 0.1 0.05 0.0]
+    X2 = {Mix P2T [merge([1.0#[samples([0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0])] 0.5#[samples(nil)]] ) ] }
+    Y2 = [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
+    X3 = {Mix P2T [merge([1.0#[samples(nil)] 0.5#[samples([1.0 0.9 0.8 0.7 0.6 0.5 0.4 0.3 0.2 0.1 0.0 1.0 0.9 0.8 0.7 0.6 0.5 0.4 0.3 0.2 0.1 0.0])]] ) ] }
+    Y3 = {Map [1.0 0.9 0.8 0.7 0.6 0.5 0.4 0.3 0.2 0.1 0.0 1.0 0.9 0.8 0.7 0.6 0.5 0.4 0.3 0.2 0.1 0.0] fun{$ A} A/2.0 end}
+    X4 = {Mix P2T [merge([1.0#nil 0.5#[samples([1.0 0.9 0.8 0.7 0.6 0.5 0.4 0.3 0.2 0.1 0.0 1.0 0.9 0.8 0.7 0.6 0.5 0.4 0.3 0.2 0.1 0.0])]] ) ] }
+    Y4 = {Map [1.0 0.9 0.8 0.7 0.6 0.5 0.4 0.3 0.2 0.1 0.0 1.0 0.9 0.8 0.7 0.6 0.5 0.4 0.3 0.2 0.1 0.0] fun{$ A} A/2.0 end}
+    X5 = {Mix P2T [merge([1.0#[samples([1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0])] 0.5#[samples([1.0 0.9 0.8 0.7 0.6 0.5 0.4 0.3 0.2 0.1 0.0 1.0 0.9 0.8 0.7 0.6 0.5 0.4 0.3 0.2 0.1 0.0])]] ) ] }
+    Y5 = [1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 0.5 0.45 0.4 0.35 0.3 0.25 0.2 0.15 0.1 0.05 0.0]
   in
     {AssertListEqual {Normalize X} {Normalize Y} 'TestMerge Passed' 'TestMerge Failed'}
+    {AssertListEqual {Normalize X2} {Normalize Y2} 'TestMerge Passed' 'TestMerge Failed'}
+    {AssertListEqual {Normalize X3} {Normalize Y3} 'TestMerge Passed' 'TestMerge Failed'}
+    {AssertListEqual {Normalize X4} {Normalize Y4} 'TestMerge Passed' 'TestMerge Failed'}
+    {AssertListEqual {Normalize X5} {Normalize Y5} 'TestMerge Passed' 'TestMerge Failed'}
   end
 end
 
@@ -250,8 +265,14 @@ proc {TestReverse P2T Mix}
     local
       X = {Mix P2T [reverse([samples([0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0])])]}
       Y = [1.0 0.9 0.8 0.7 0.6 0.5 0.4 0.3 0.2 0.1 0.0]
+      X2 = {Mix P2T [reverse([samples(nil)])]}
+      Y2 = nil
+      X3 = {Mix P2T [reverse(nil)]}
+      Y3 = nil
     in
       {AssertListEqual {Normalize X} {Normalize Y} 'TestReverse Passed' 'TestReverse Failed'}
+      {AssertListEqual {Normalize X2} {Normalize Y2} 'TestReverse Passed' 'TestReverse Failed'}
+      {AssertListEqual {Normalize X3} {Normalize Y3} 'TestReverse Passed' 'TestReverse Failed'}
     end
 end
 
@@ -259,8 +280,14 @@ proc {TestRepeat P2T Mix}
     local
       X = {Mix P2T [repeat(amount:2 [samples([0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0])])]}
       Y = [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
+      X2 = {Mix P2T [repeat(amount:2 [samples(nil)])]}
+      Y2 = nil
+      X3 = {Mix P2T [repeat(amount:2 nil)]}
+      Y3 = nil
     in
       {AssertListEqual {Normalize X} {Normalize Y} 'TestRepeat Passed' 'TestRepeat Failed'}
+      {AssertListEqual {Normalize X2} {Normalize Y2} 'TestRepeat Passed' 'TestRepeat Failed'}
+      {AssertListEqual {Normalize X3} {Normalize Y3} 'TestRepeat Passed' 'TestRepeat Failed'}
     end
 end
 

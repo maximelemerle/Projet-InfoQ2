@@ -393,7 +393,7 @@ local
    % si l'une est plus petite que considere les elements manquants comme des O
    fun {SumMult L1 L2 Facteur}
      case L1
-     of nil then {Mult L2 Facteur}
+     of nil then {Map L2 fun {$ A} Facteur*A end}
      [] H|T then
        case L2
        of nil then L1
@@ -401,13 +401,6 @@ local
           L1.1+Facteur*L2.1|{SumMult L1.2 L2.2 Facteur}
        end
      end
-   end
-
-   fun {Mult L Facteur}
-      case L
-      of nil then nil
-      [] H|T then H*Facteur|{Mult T Facteur}
-      end
    end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -686,11 +679,11 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-   Music = {Project.load 'PirV3.dj.oz'}
+   Music = {Project.load 'PiratV4T.dj.oz'}
    Start
 
    % Uncomment next line to insert your tests.
-   \insert 'tests.oz'
+   %\insert 'tests.oz'
    % !!! Remove this before submitting.
 in
    Start = {Time}
@@ -698,15 +691,15 @@ in
    {Property.put print print(width:1000)}
    {Property.put print print(depth:1000)}
    % Uncomment next line to run your tests.
-   {Test Mix PartitionToTimedList}
+   %{Test Mix PartitionToTimedList}
 
    % Add variables to this list to avoid "local variable used only once"
    % warnings.
-   {ForAll [NoteToExtended Music] Wait}
+   %{ForAll [NoteToExtended Music] Wait}
 
    % Calls your code, prints the result and outputs the result to `out.wav`.
    % You don't need to modify this.
-   %{Browse {Project.run Mix PartitionToTimedList Music 'Test.wav'}}
+   {Browse {Project.run Mix PartitionToTimedList Music 'Test.wav'}}
    %{Browse {List.length {Mix PartitionToTimedList Music}}}
    %{Browse {PartitionToTimedList [instrument(name:piano [a instrument(name:guitar [[note(duration:1.0 instrument:none name:a octave:4 sharp:false) note(duration:2.0 instrument:none name:b octave:5 sharp:false)]])])]}}
    %{Browse {List.length {Echantillon {PartitionToTimedList [duration(seconds:5.0 [a])]}}.1}}
