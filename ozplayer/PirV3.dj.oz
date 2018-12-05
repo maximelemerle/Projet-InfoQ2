@@ -1,3 +1,4 @@
+
 local
 
   Main1 = [
@@ -56,7 +57,7 @@ local
   Part2 = [
   duration(seconds:0.2 [[c5 d5 a f5]]) silence(duration:0.2) stretch(factor:0.2 [[a#4 d5 f5] [a#4 f5] [d5 g5 a]]) silence(duration:0.2)
   duration(seconds:0.2 [[d5 f5 stretch(factor:4.0 [a5])]]) stretch(factor:0.2 [f5 d5])
-  duration(seconds:0.6 [a]) silence(duration: 0.6) duration(seconds:0.2 [[d5 g5 stretch(factor:4.0 [a#5])]]) stretch(factor:0.2 [g5 a5])
+  duration(seconds:0.6 [a]) silence(duration:0.6) duration(seconds:0.2 [[d5 g5 stretch(factor:4.0 [a#5])]]) stretch(factor:0.2 [g5 a5])
   duration(seconds:0.6 [a#5])
   ]
 
