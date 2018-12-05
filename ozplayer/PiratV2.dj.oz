@@ -89,7 +89,7 @@ in
    %[wave('wave/animals/cow.wav')]
    [ merge( [0.2#[partition(Main1)] 0.2#[partition(Main2)] 0.2#[partition(Main3)] 0.05#[partition(Main4)] 0.05#[partition(Main5)]] ) ]
      merge( [0.3#[partition(Part2)] 0.1#[partition(Part2bis)]])
-     merge( [0.3#[partition(Part3)] 0.1#[partition(Part3bis)]])
+     merge( [0.3#[partition(Part3)] 0.3#[partition(Part3bis)]])
    ]%0.25#[wave('FinalPart3.wav')] 0.25#[wave('FinalPart4.wav')] 0.5#[partition(Main3)] 0.2# 0.2#[partition(Main4)] 0.2#[partition(Main5)]
    %[partition(Main1)]
    %[merge([0.5#[wave('FinalPart1.wav')] 0.5#[wave('FinalPart2.wav')] ])]
