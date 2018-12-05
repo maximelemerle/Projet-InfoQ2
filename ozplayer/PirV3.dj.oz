@@ -110,4 +110,4 @@ in
 
    %[partition(Main1)]
    %[merge([0.5#[wave('FinalPart1.wav')] 0.5#[wave('FinalPart2.wav')] ])]
-end
+end 
