@@ -1,4 +1,3 @@
-
 local
 
   Main1 = [
@@ -61,7 +60,7 @@ local
   duration(seconds:0.6 [a#5])
   ]
 
-  Part2bis[ 
+  Part2bis = [ 
   stretch(factor:0.6 [[c3 c23] [a#1 a#2]]) duration(seconds:0.4 [[a1 a2]]) duration(seconds:0.2 [[a1 a2]]) duration(seconds:0.4 [[a1 a2]])duration(seconds:0.4 [[a1 a2]])
   stretch(factor:0.2 [a1 a2 a1 e2 [a1 a2]]) duration(seconds:0.4 [[g1 g2]]) duration(seconds:0.2 [[g1 g2]]) duration(seconds:0.4 [[g1 g2]])duration(seconds:0.4 [[g1 g2]])
   ]
@@ -69,12 +68,12 @@ local
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-  Part3 = [
-  silence(duration:0.4) stretch(factor:1.2 [[d f a] [d f a]])
-  duration(seconds:0.2[[c f a]]) silence(duration:0.2) duration(seconds:0.2 [[c f a]]) silence(duration:0.2) duration(seconds:0.2 [[c f a]]) silence(duration: 0.2) duration(seconds:0.2 [[c f a]]) duration(seconds:1.0 [[c e a]])
-  stretch(factor:1.2 [[d g a#3] [a3 d f]])
-  stretch(factor:0.4 [[c#4 e a3] [a3 d f] [c#4 e a3]]) stretch(factor:0.2 [d [c#4 c#5] [d d5] [c#4 c#5] [e e5] [g#4 g#5]])
-  ]
+  %Part3 = [
+  %silence(duration:0.4) stretch(factor:1.2 [[d f a] [d f a]])
+  %duration(seconds:0.2[[c f a]]) silence(duration:0.2) duration(seconds:0.2 [[c f a]]) silence(duration:0.2) duration(seconds:0.2 [[c f a]]) silence(duration: 0.2) duration(seconds:0.2 [[c f a]]) duration(seconds:1.0 [[c e a]])
+  %stretch(factor:1.2 [[d g a#3] [a3 d f]])
+  %stretch(factor:0.4 [[c#4 e a3] [a3 d f] [c#4 e a3]]) stretch(factor:0.2 [d [c#4 c#5] [d d5] [c#4 c#5] [e e5] [g#4 g#5]])
+  %]
 
   %Part3bis = [
   %silence(duration:0.4) duration(seconds:0.4 [[c3 c2]]) drone(amount:4 [c3 c2]) duration(seconds:0.4 [[g1 g2]]) drone(amount:4 [g1 g2])
