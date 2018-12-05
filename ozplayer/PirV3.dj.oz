@@ -14,7 +14,7 @@ local
   duration(seconds:0.2 [a#4]) silence(duration:0.2) duration(seconds:0.2 [[a f]]) duration(seconds:0.2 [[e g]]) duration(seconds:0.2 [[f a]]) duration(seconds:0.4 [[a3 d]])
   silence(duration:0.2) duration(seconds:0.2 [d5]) duration(seconds:0.2 [e5]) duration(seconds:0.2 [f5]) silence(duration:0.2) duration(seconds:0.2 [f5]) silence(duration:0.2) duration(seconds:0.2 [[e5 g5]]) silence(duration:0.2)
   duration(seconds:0.2 [[f5 a5]]) duration(seconds:0.6 [[d5 a f]]) duration(seconds:0.2 [d5]) duration(seconds:0.2 [f5]) duration(seconds:0.2 [[a c#5 e5]])
-  silence(duration:0.2) duration(seconds:0.2 [e5]) silence(duration:0.2) duration(seconds:0.2 [[a d5]]) duration(seconds:0.2 [c#5]) duration(seconds:0.2 duration(seconds:0.2 [[a d5]]) 
+  silence(duration:0.2) duration(seconds:0.2 [e5]) silence(duration:0.2) duration(seconds:0.2 [[a d5]]) duration(seconds:0.2 [c#5]) duration(seconds:0.2 [duration(seconds:0.2 [[a d5]])])
   silence(duration:0.2) duration(seconds:0.2 [[a f d5]]) duration(seconds:0.2 [d5]) duration(seconds:0.2 [[a c5 e5]]) silence(duration:0.2)
   ]
 
@@ -45,9 +45,9 @@ local
   duration(seconds:0.5 [d2]) silence(duration:0.1)
   duration(seconds:0.6 [[d3 d2]]) duration(seconds:0.6 [[d3 d2]]) duration(seconds:0.6 [[a#2 a#1]]) duration(seconds:0.2 [[a#2 a#1]]) duration(seconds:0.4 [[a#2 a#1]])
   duration(seconds:0.6 [[g2 g1]]) duration(seconds:0.6 [[a2 a1]]) duration(seconds:0.6 [[d2 d3]]) duration(seconds:0.6 [[d2 d3]])
-  duration(seconds:0.6 [[a#2 a#3]]) duration(seconds:0.6 [[a#2 a#3]]) duration(seconds:0.6 [[d2 d3]]) duration(seconds:0.6 [[d2 d3]]) duration(seconds:0.6 [[a1 a1]]) duration(seconds:0.6 [[a1 a2]]) 
+  duration(seconds:0.6 [[a#2 a#3]]) duration(seconds:0.6 [[a#2 a#3]]) duration(seconds:0.6 [[d2 d3]]) duration(seconds:0.6 [[d2 d3]]) duration(seconds:0.6 [[a1 a1]]) duration(seconds:0.6 [[a1 a2]])
   duration(seconds:0.6 [[d2 d3]]) silence(duration:0.2) duration(seconds:0.2 [[d2 d3]]) duration(seconds:0.2 [[c2 c3]]) silence(duration:0.2)
-  ] 
+  ]
 
 
   Main5 = [silence(duration:11.4) duration(seconds:0.1 [d1])]
@@ -61,9 +61,9 @@ local
   duration(seconds:0.6 [a#5])
   ]
 
-  Part2bis[ 
-  stretch(factor:0.6 [[c3 c23] [a#1 a#2]]) duration(seconds:0.4 [[a1 a2]]) duration(seconds:0.2 [[a1 a2]]) duration(seconds:0.4 [[a1 a2]])duration(seconds:0.4 [[a1 a2]])
-  stretch(factor:0.2 [a1 a2 a1 e2 [a1 a2]]) duration(seconds:0.4 [[g1 g2]]) duration(seconds:0.2 [[g1 g2]]) duration(seconds:0.4 [[g1 g2]])duration(seconds:0.4 [[g1 g2]])
+  Part2bis = [
+  stretch(factor:0.6 [[c3 c23] [a#1 a#2]]) duration(seconds:0.4 [[a1 a2]]) duration(seconds:0.2 [[a1 a2]]) duration(seconds:0.4 [[a1 a2]]) duration(seconds:0.4 [[a1 a2]])
+  stretch(factor:0.2 [a1 a2 a1 e2 [a1 a2]]) duration(seconds:0.4 [[g1 g2]]) duration(seconds:0.2 [[g1 g2]]) duration(seconds:0.4 [[g1 g2]]) duration(seconds:0.4 [[g1 g2]])
   ]
 
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -71,7 +71,7 @@ local
 
   Part3 = [
   silence(duration:0.4) stretch(factor:1.2 [[d f a] [d f a]])
-  duration(seconds:0.2[[c f a]]) silence(duration:0.2) duration(seconds:0.2 [[c f a]]) silence(duration:0.2) duration(seconds:0.2 [[c f a]]) silence(duration: 0.2) duration(seconds:0.2 [[c f a]]) duration(seconds:1.0 [[c e a]])
+  duration(seconds:0.2 [[c f a]]) silence(duration:0.2) duration(seconds:0.2 [[c f a]]) silence(duration:0.2) duration(seconds:0.2 [[c f a]]) silence(duration:0.2) duration(seconds:0.2 [[c f a]]) duration(seconds:1.0 [[c e a]])
   stretch(factor:1.2 [[d g a#3] [a3 d f]])
   stretch(factor:0.4 [[c#4 e a3] [a3 d f] [c#4 e a3]]) stretch(factor:0.2 [d [c#4 c#5] [d d5] [c#4 c#5] [e e5] [g#4 g#5]])
   ]
@@ -88,11 +88,12 @@ local
 in
    % This is a music :)
    %[wave('wave/animals/cow.wav')]
-   [ merge( [0.3#[partition(Main1)] 0.3#[partition(Main2)] 0.3#[partition(Main3)] 0.1#[partition(Main4)] 0.1#[partition(Main5)]] ) 
-     merge( [0.3#[partition(Part2)] 0.1#[partition(Part2bis)]])
+   [
+   merge( [0.3#[partition(Main1)] 0.3#[partition(Main2)] 0.3#[partition(Main3)] 0.1#[partition(Main4)] 0.1#[partition(Main5)]] )
+   merge( [0.3#[partition(Part2)] 0.1#[partition(Part2bis)]]  )
      %merge( [0.3#[partition(Part3)] 0.1#[partition(Part3bis)]])
    ] %0.25#[wave('FinalPart3.wav')] 0.25#[wave('FinalPart4.wav')] 0.5#[partition(Main3)] 0.2# 0.2#[partition(Main4)] 0.2#[partition(Main5)]
-   
+
    %[partition(Main1)]
    %[merge([0.5#[wave('FinalPart1.wav')] 0.5#[wave('FinalPart2.wav')] ])]
 end

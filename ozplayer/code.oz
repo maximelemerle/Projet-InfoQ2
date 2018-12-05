@@ -221,6 +221,8 @@ local
           {Append {Drone {PartitionToTimedList N} A} {PartitionToTimedList T}}
        [] transpose(semitones:S L) then
           {Append {Transpose S {PartitionToTimedList L}} {PartitionToTimedList T}}
+       [] instrument(name:Name P) then
+          {Append {Instrument Name {PartitionToTimedList P}} {PartitionToTimedList T}}
        else
           {NoteToExtended H}|{PartitionToTimedList T}
        end
@@ -246,30 +248,38 @@ local
         % P2T : Fonction PartitionToTimedList utilie lors de l'echantillonage
         % Music : Liste de <part> a transformer                                 [<music>]
         % Lissage : Variable gerant le lissage des samples                      [boolean] (Extension)
-        fun {Mix2 P2T Music Lissage}
+        fun {Mix2 P2T Music Lissage Extension}
           case Music
           of nil then nil
           [] H|T then
             case H
-            of samples(Samples) then Samples|{Mix2 P2T T Lissage}
-            [] partition(Partition) then {Echantillon {P2T Partition} Lissage}|{Mix2 P2T T Lissage}
-            [] wave(File) then {Project.readFile File}|{Mix2 P2T T Lissage}
-            [] merge(MusicsList) then {Merge {MusicToList MusicsList P2T}}|{Mix2 P2T T Lissage}
-            [] reverse(Music) then {Reverse {Mix P2T Music}}|{Mix2 P2T T Lissage}
-            [] repeat(amount:Integer Music) then {Repeat Integer {Mix P2T Music}}|{Mix2 P2T T Lissage}
-            [] loop(duration:Duration Music) then {Loop Duration {Mix P2T Music}}|{Mix2 P2T T Lissage}
-            [] clip(low:Low high:High Music) then {Clip Low High {Mix P2T Music}}|{Mix2 P2T T Lissage}
-            [] echo(delay:Delay decay:Decay Music) then {Echo Delay Decay {Mix P2T Music}}|{Mix2 P2T T Lissage}
-            [] echo(delay:Delay decay:Decay repeat:Repeat Music) then {MultipleEcho Delay Decay Repeat {Mix P2T Music}}|{Mix2 P2T T Lissage}
-            [] fade(start:Start out:Out Music) then {Fade Start Out {Mix P2T Music}}|{Mix2 P2T T Lissage}
-            [] cut(start:Start finish:End Music) then {Cut Start End {Mix P2T Music}}|{Mix2 P2T T Lissage}
-            else nil
+            of samples(Samples) then Samples|{Mix2 P2T T Lissage Extension}
+            [] partition(Partition) then {Echantillon {P2T Partition} Lissage}|{Mix2 P2T T Lissage Extension}
+            [] wave(File) then {Project.readFile File}|{Mix2 P2T T Lissage Extension}
+            [] merge(MusicsList) then {Merge {MusicToList MusicsList P2T}}|{Mix2 P2T T Lissage Extension}
+            [] reverse(Music) then {Reverse {Mix P2T Music}}|{Mix2 P2T T Lissage Extension}
+            [] repeat(amount:Integer Music) then {Repeat Integer {Mix P2T Music}}|{Mix2 P2T T Lissage Extension}
+            [] loop(duration:Duration Music) then {Loop Duration {Mix P2T Music}}|{Mix2 P2T T Lissage Extension}
+            [] clip(low:Low high:High Music) then {Clip Low High {Mix P2T Music}}|{Mix2 P2T T Lissage Extension}
+            [] echo(delay:Delay decay:Decay Music) then {Echo Delay Decay {Mix P2T Music}}|{Mix2 P2T T Lissage Extension}
+            [] fade(start:Start out:Out Music) then {Fade Start Out {Mix P2T Music}}|{Mix2 P2T T Lissage Extension}
+            [] cut(start:Start finish:End Music) then {Cut Start End {Mix P2T Music}}|{Mix2 P2T T Lissage Extension}
+            else
+              if Extension then
+                case H
+                of echo(delay:Delay decay:Decay repeat:Repeat Music) then {MultipleEcho Delay Decay Repeat {Mix P2T Music}}|{Mix2 P2T T Lissage Extension}
+                [] crossfade(seconds:Seconds Music1 Music2) then {Crossfade Seconds {Mix P2T Music1} {Mix P2T Music2}}|{Mix2 P2T T Lissage Extension}
+                else nil
+                end
+              else
+                nil
+              end
             end
           else nil
           end
         end
       in
-        {Clip ~1.0 1.0 {Flatten {Mix2 P2T Music true}}}
+        {Clip ~1.0 1.0 {Flatten {Mix2 P2T Music true false}}}
       end
    end
 
@@ -287,7 +297,7 @@ local
          end
          % Note : Note a examiner                                               [<extended note>]
          % Constant : Constante liee a chaque note                              [float]
-         %            correspond a 2^h/12 * 2pi * f / 44100
+         %            correspond a 2pi * f / 44100
          % Retourne la liste des samples de Note
          fun {Echantillon2 Note Constant I} % Parcours la partition
            if {Int.toFloat I}=<44100.0*Note.duration then
@@ -313,10 +323,15 @@ local
             [] silence(duration:D) then
                 {ListeNulle {Float.toInt D*44100.0}}|{Echantillon T ExtensionLissage}
             else
-              if ExtensionLissage then
-                 {Lissage H {Echantillon2 H {HauteurPow H}*H.duration*0.06268937721/H.duration 1}}|{Echantillon T ExtensionLissage}
+              case H.instrument
+              of none then
+                  if ExtensionLissage then
+                     {Lissage H {Echantillon2 H {HauteurPow H}*0.06268937721 1}}|{Echantillon T ExtensionLissage}
+                  else
+                     {Echantillon2 H {HauteurPow H}*0.06268937721 1}|{Echantillon T ExtensionLissage}
+                  end
               else
-                 {Echantillon2 H {HauteurPow H}*0.06268937721 1}|{Echantillon T ExtensionLissage}
+                nil
               end
             end
          end
@@ -351,11 +366,11 @@ local
      end
    end
 
-   % MusicsList : Liste de samples                                              [<samples>]
+   % MusicsList : Liste de tuples composes d'un facteur et de <music>           <musics with intenities>
    % Retourne la somme des listes de samples multiplie par le facteur
    fun {Merge MusicsList}
      local
-       % MusicsList : Liste de samples                                          [<samples>]
+       % MusicsList : Liste de tuples composes d'un facteur et de <music>         <musics with intenities>
        % L : Accumulateur contenant la somme des listes deja effectuee          [<samples>]
        fun {Merge2 MusicsList L}
          case MusicsList
@@ -363,7 +378,7 @@ local
          [] H|T then
            case H
            of Facteur#List then
-             {Merge2 T {Sum L {Mult Facteur List}}}
+             {Merge2 T {SumMult L List Facteur}}
            end
          end
        end
@@ -374,35 +389,19 @@ local
 
    % List1 : Liste de samples                                                   [<samples>]
    % List2 : Liste de samples                                                   [<samples>]
-   % Retourne la somme des deux listes,
+   % Retourne la somme des deux listes avec la seconde multiplie par Facteur,
    % si l'une est plus petite que considere les elements manquants comme des O
-   fun {Sum List1 List2}
-     local
-       fun {Sum2 L1 L2}
-         case L1
-         of nil then L2
-         [] H|T then
-           L1.1+L2.1|{Sum2 L1.2 L2.2}
-         end
-       end
-     in
-       if {List.length List1}<{List.length List2} then {Sum2 List1 List2}
-       else {Sum2 List2 List1}
-       end
-     end
-   end
-
-   % Facteur : Facteur multipliant chaque samples                               [float]
-   % L : liste des samples a modifier                                           [<samples>]
-   % Retourne une liste composee des samples de L multiplie par Facteur
-   fun {Mult Facteur L}
-     case L
-     of nil then nil
+   fun {SumMult L1 L2 Facteur}
+     case L1
+     of nil then L2
      [] H|T then
-       H*Facteur|{Mult Facteur T}
+       case L2
+       of nil then L1
+       [] H|T then
+          L1.1+Facteur*L2.1|{SumMult L1.2 L2.2 Facteur}
+       end
      end
    end
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Music : Liste de samples                                                      [<samples>]
@@ -502,7 +501,7 @@ fun {Fade Start Out Music}
         end
       end
    in
-      {Flatten [{FadeIn Start Music 0} {Cut Start Out Music} {FadeOut Out L {Float.toInt 44100.0*Out-1.0}}]}
+      {Flatten [{FadeIn Start Music 0} {Cut Start {Int.toFloat {List.length Music}}/44100.0-Out Music} {FadeOut Out L {Float.toInt 44100.0*Out-1.0}}]}
    end
 end
 
@@ -632,7 +631,8 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Samples : List de Samples                                  [<samples>]
 % Filtre Passe-Bas
-% Calcule avec Matlab
+% Facteur calcule avec Matlab pour un filtre d'ordre 5
+% et une frequence de coupure de 5000Hz
 fun{LowPass Samples a b c d e f} %{LowPass Samples 0 0 0 0 0 0}
   case Samples of nil
   then nil
@@ -646,15 +646,40 @@ fun{LowPass2 a b c d e f}
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-fun{crossfade Seconds Music1 Music2}
-  {Cut Music1 0 ({List.length Music1}/44100.0)} | {Merge 1#{Fade 0 seconds {List.take music2 seconds*44100.0}} 1#{Fade seconds 0 {List.drop {List.length Music1}-seconds*44100.0)}}} | {List.drop music2 seconds*44100.0}
+% Seconds : Nbre de seconde du fade a l'entree                                  [float]
+% Music1 : List de Samples                                                      [<samples>]
+% Music2 : List de Samples                                                      [<samples>]
+% Applique un fade de sortie a Music1 et d'entree a Music2 puis les supperpose
+fun{Crossfade Seconds Music1 Music2}
+  {Cut Music1 0 ({List.length Music1}/44100.0)-Seconds}|{Merge
+    [
+    1.0#[samples({Fade 0 Seconds {List.drop {List.length Music1}-{Float.toInt Seconds*44100.0}}})]
+    1.0#[samples({Fade Seconds 0 {List.take Music2 {Float.toInt Seconds*44100.0}}})]
+    ]
+  }|{List.drop Music2 Seconds*44100.0}
 end
 
+% Name : Nom de l'Intstrument
+% Partition : Partition a modifier, deja etendue                                [<partition>]
+% Change l'instrument de toute les notes n'ayant pas d'instrument
+fun {Instrument Name Partition}
+  case Partition
+  of nil then nil
+  [] H|T then
+      case H
+      of nil then nil
+      [] H1|T1 then {Instrument Name {PartitionToTimedList H}}|{Instrument Name T}
+      else case H.instrument
+           of none then note(name:H.name octave:H.octave sharp:H.sharp duration:H.duration instrument:Name)|{Instrument Name T}
+           else H|{Instrument Name T}
+           end
+      end
+  end
+end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-   Music = {Project.load 'PirDesCar.dj.oz'}
+   Music = {Project.load 'PirV3.dj.oz'}
    Start
 
    % Uncomment next line to insert your tests.
@@ -674,9 +699,9 @@ in
 
    % Calls your code, prints the result and outputs the result to `out.wav`.
    % You don't need to modify this.
-   {Browse {Project.run Mix PartitionToTimedList Music 'Testbis.wav'}}
+   {Browse {Project.run Mix PartitionToTimedList Music 'Test.wav'}}
    %{Browse {List.length {Mix PartitionToTimedList Music}}}
-   %{Browse {PartitionToTimedList [[note(duration:1.0 instrument:none name:a octave:4 sharp:false) note(duration:2.0 instrument:none name:b octave:5 sharp:false)]]}}
+   %{Browse {PartitionToTimedList [instrument(name:piano [a instrument(name:guitar [[note(duration:1.0 instrument:none name:a octave:4 sharp:false) note(duration:2.0 instrument:none name:b octave:5 sharp:false)]])])]}}
    %{Browse {List.length {Echantillon {PartitionToTimedList [duration(seconds:5.0 [a])]}}.1}}
    %{Browse Music}
 
