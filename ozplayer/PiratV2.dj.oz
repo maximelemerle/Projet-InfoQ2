@@ -13,7 +13,7 @@ local
   duration(seconds:0.2 [a#4]) silence(duration:0.2) duration(seconds:0.2 [[a f]]) duration(seconds:0.2 [[e g]]) duration(seconds:0.2 [[f a]]) duration(seconds:0.4 [[a3 d]])
   silence(duration:0.2) duration(seconds:0.2 [d]) duration(seconds:0.2 [e]) duration(seconds:0.2 [f]) silence(duration:0.2) duration(seconds:0.2 [f]) silence(duration:0.2) duration(seconds:0.2 [[e g]]) silence(duration:0.2)
   duration(seconds:0.2 [[f a]]) duration(seconds:0.6 [[d a3 f3]]) duration(seconds:0.2 [d]) duration(seconds:0.2 [f]) duration(seconds:0.2 [[a3 c#4 e]])
-  silence(duration:0.2) duration(seconds:0.2 [e]) silence(duration:0.2) duration(seconds:0.2 [f]) duration(seconds:0.2 [d]) duration(seconds:0.8 [[a3 c#4 e]]) %duration(seconds:0.2 [a]) duration(seconds:0.2 [c5])
+  silence(duration:0.2) duration(seconds:0.2 [e]) silence(duration:0.2) duration(seconds:0.2 [f]) duration(seconds:0.2 [d]) duration(seconds:0.1 [[a3 c#4 e]]) %duration(seconds:0.2 [a]) duration(seconds:0.2 [c5])
   ]
 
 
@@ -43,7 +43,7 @@ local
   duration(seconds:0.5 [d2]) silence(duration:0.1)
   duration(seconds:0.6 [[d3 d2]]) duration(seconds:0.6 [[d3 d2]]) duration(seconds:0.6 [[a#2 a#1]]) duration(seconds:0.2 [[a#2 a#1]]) duration(seconds:0.4 [[a#2 a#1]])
   duration(seconds:0.6 [[g2 g1]]) duration(seconds:0.6 [[a2 a1]]) duration(seconds:0.6 [[d2 d3]]) duration(seconds:0.6 [[d2 d3]])
-  duration(seconds:0.6 [[a#2 a#3]]) duration(seconds:0.6 [[a#2 a#3]]) duration(seconds:0.6 [[d2 d3]]) duration(seconds:0.6 [[d2 d3]])
+  duration(seconds:0.6 [[a#2 a#3]]) duration(seconds:0.6 [[a#2 a#3]]) duration(seconds:0.6 [[d2 d3]]) 
   ]
 
 
