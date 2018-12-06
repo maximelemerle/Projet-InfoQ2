@@ -43,7 +43,7 @@ local
   duration(seconds:0.5 [d2]) silence(duration:0.1)
   duration(seconds:0.6 [[d3 d2]]) duration(seconds:0.6 [[d3 d2]]) duration(seconds:0.6 [[a#2 a#1]]) duration(seconds:0.2 [[a#2 a#1]]) duration(seconds:0.4 [[a#2 a#1]])
   duration(seconds:0.6 [[g2 g1]]) duration(seconds:0.6 [[a2 a1]]) duration(seconds:0.6 [[d2 d3]]) duration(seconds:0.6 [[d2 d3]])
-  duration(seconds:0.6 [[a#2 a#3]]) duration(seconds:0.6 [[a#2 a#3]]) duration(seconds:0.6 [[d2 d3]]) duration(seconds:0.6 [[a1 a2]]) 
+  duration(seconds:0.6 [[a#2 a#3]]) duration(seconds:0.6 [[a#2 a#3]]) duration(seconds:0.6 [[d2 d3]]) duration(seconds:0.6 [[a1 a2]])
   ]
 
 
@@ -116,7 +116,7 @@ local
   Part2F = [
   duration(seconds:1.2 [[a3 c#4 f]])
   ]
-  
+
   Outro = [
   silence(duration:0.2) stretch(factor:1.2 [[d f a] [d f a#4]])
   duration(seconds:0.2[[c f a]]) silence(duration:0.2) duration(seconds:0.2 [[c f a]]) silence(duration:0.2) duration(seconds:0.2 [[c f a]]) silence(duration: 0.2) duration(seconds:0.2 [[c f a]]) duration(seconds:1.0 [[c e g]])
@@ -138,8 +138,8 @@ in
    merge( [0.3#[partition(Meb1)] 0.3#[partition(Meb2)] 0.3#[partition(Meb3)] 0.1#[partition(Meb4)] 0.1#[partition(Meb5)]] )
    merge( [0.3#[partition(Meh1)] 0.3#[partition(Meh2)] 0.3#[partition(Meh3)] 0.15#[partition(Meh4)] 0.15#[partition(Meh5)]] )
    merge( [0.3#[partition(Part2)] 0.3#[partition(Part2bis)]]  )
-   fade(start:0.0 out:1.2 [partition(Part2F)])
-merge( [0.3#[partition(Outro)] 0.15#[partition(Outro2)]]  )
+   fade(  start:0.0 out:1.2 [partition(Part2F)] )
+   merge( [0.3#[partition(Outro)] 0.15#[partition(Outro2)]]  )
    ]
 
 end

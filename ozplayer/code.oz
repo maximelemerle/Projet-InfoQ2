@@ -269,6 +269,7 @@ local
                 case H
                 of echo(delay:Delay decay:Decay repeat:Repeat Music) then {MultipleEcho Delay Decay Repeat {Mix P2T Music}}|{Mix2 P2T T Lissage Extension}
                 [] crossfade(seconds:Seconds Music1 Music2) then {Crossfade Seconds {Mix P2T Music1} {Mix P2T Music2}}|{Mix2 P2T T Lissage Extension}
+                [] lowpass(Music) then {LowPass {Mix P2T Music} 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0}|{Mix2 P2T T Lissage Extension}
                 else nil
                 end
               else
@@ -279,7 +280,7 @@ local
           end
         end
       in
-        {Clip ~1.0 1.0 {Flatten {Mix2 P2T Music true false}}}
+        {Clip ~1.0 1.0 {Flatten {Mix2 P2T Music false true}}}    % Deux boolean, Lissage et Extension
       end
    end
 
@@ -481,28 +482,30 @@ end
 % Cree un fondu pour adoucir les samples
 fun {Fade Start Out Music}
    local
-      fun {FadeIn Start Music Acc}
-        case Music of nil then nil
-        [] H|T then
-          if {Int.toFloat Acc}<44100.0*Start then
-             H*{Float.'/' {Int.toFloat Acc} Start*44100.0}|{FadeIn Start T Acc+1}
-          else nil
-          end
-        end
-      end
       L =  {List.drop Music {List.length Music}-{Float.toInt Out*44100.0}}
-      fun {FadeOut Out Music Acc}
-        case Music of nil then nil
-        [] H|T then
-          if {Int.toFloat Acc}>=0.0 then
-             H*{Float.'/' {Int.toFloat Acc} Out*44100.0}|{FadeOut Out T Acc-1}
-          else nil
-          end
-        end
-      end
    in
       {Flatten [{FadeIn Start Music 0} {Cut Start {Int.toFloat {List.length Music}}/44100.0-Out Music} {FadeOut Out L {Float.toInt 44100.0*Out-1.0}}]}
    end
+end
+
+fun {FadeIn Start Music Acc}
+  case Music of nil then nil
+  [] H|T then
+    if {Int.toFloat Acc}<44100.0*Start then
+       H*{Float.'/' {Int.toFloat Acc} Start*44100.0}|{FadeIn Start T Acc+1}
+    else nil
+    end
+  end
+end
+
+fun {FadeOut Out Music Acc}
+  case Music of nil then nil
+  [] H|T then
+    if {Int.toFloat Acc}>=0.0 then
+       H*{Float.'/' {Int.toFloat Acc} Out*44100.0}|{FadeOut Out T Acc-1}
+    else nil
+    end
+  end
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -616,33 +619,33 @@ end
 % Echo Multiple avec intensite decroissante
 fun {MultipleEcho Delay Decay Repeat Music}
   local
-    fun {Echo2 Delay Decay Repeat Music L Acc}
+    fun {Echo2 Delay Decay Repeat Music Acc}
       if Repeat<1 then
-        {Merge L.2}
+        nil
       else
-        {Echo2 Delay Decay Repeat-1 Music L|{Pow Decay Acc}#{Append {ListeNulle {Float.toInt Delay*Acc*44100.0}} Music} Acc+1}
+        {Pow Decay {Int.toFloat Acc}}#{Append {ListeNulle {Float.toInt Delay*{Int.toFloat Acc}*44100.0}} Music}|{Echo2 Delay Decay Repeat-1 Music Acc+1}
       end
     end
   in
-    {Echo2 Delay Decay Repeat Music nil 1}
+    {Merge {Echo2 Delay Decay Repeat Music 1}}
   end
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Samples : List de Samples                                  [<samples>]
 % Filtre Passe-Bas
-% Facteur calcule avec Matlab pour un filtre d'ordre 5
-% et une frequence de coupure de 5000Hz
-fun{LowPass Samples a b c d e f} %{LowPass Samples 0 0 0 0 0 0}
-  case Samples of nil
-  then nil
-  [] H|T then
-    {LowPass2 H b c d e f}|{LowPass T a H b c d e}
+% Facteur calcule avec Matlab pour un filtre d'ordre 10
+% et une frequence de coupure de 400Hz
+fun{LowPass Music A B C D E F G H I J K} %{LowPass Samples 0 0 0 0 0 0 0 0 0 0 0}
+  case Music
+  of nil then nil
+  [] H|T then {LowPass2 H B C D E F G H I J K}|{LowPass T A H B C D E F G H I J}
+  else {Browse Music} nil
   end
 end
 
-fun{LowPass2 a b c d e f}
-  a*0.1169 + b*0.1746 + c*0.2084 + d*0.2084 + e*0.1746 + f*0.1169
+fun{LowPass2 A B C D E F G H I J K}
+  A*0.0902 + B*0.0906 + C*0.091 + D*0.0912 + E*0.0914 + F*0.0914 + G*0.0914 + H*0.0912 + I*0.091 + J*0.0906 + K*0.0902
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -651,12 +654,12 @@ end
 % Music2 : List de Samples                                                      [<samples>]
 % Applique un fade de sortie a Music1 et d'entree a Music2 puis les supperpose
 fun{Crossfade Seconds Music1 Music2}
-  {Cut Music1 0 ({List.length Music1}/44100.0)-Seconds}|{Merge
+  {List.take Music1 {List.length Music1}-{Float.toInt Seconds*44100.0}}|{Merge
     [
-    1.0#[samples({Fade 0 Seconds {List.drop {List.length Music1}-{Float.toInt Seconds*44100.0}}})]
-    1.0#[samples({Fade Seconds 0 {List.take Music2 {Float.toInt Seconds*44100.0}}})]
+    0.75#{FadeOut Seconds {List.drop Music1 {List.length Music1}-{Float.toInt Seconds*44100.0}} {Float.toInt Seconds*44100.0-1.0}}
+    0.75#{FadeIn Seconds {List.take Music2 {Float.toInt Seconds*44100.0}} 0}
     ]
-  }|{List.drop Music2 Seconds*44100.0}
+  }|{List.drop Music2 {Float.toInt Seconds*44100.0}}
 end
 
 % Name : Nom de l'Intstrument
@@ -679,7 +682,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-   Music = {Project.load 'PiratV4T.dj.oz'}
+   Music = {Project.load 'example.dj.oz'}
    Start
 
    % Uncomment next line to insert your tests.
@@ -688,8 +691,8 @@ end
 in
    Start = {Time}
 
-   {Property.put print print(width:1000)}
-   {Property.put print print(depth:1000)}
+   %{Property.put print print(width:1000)}
+   %{Property.put print print(depth:1000)}
    % Uncomment next line to run your tests.
    %{Test Mix PartitionToTimedList}
 
@@ -699,7 +702,7 @@ in
 
    % Calls your code, prints the result and outputs the result to `out.wav`.
    % You don't need to modify this.
-   {Browse {Project.run Mix PartitionToTimedList Music 'Test.wav'}}
+   {Browse {Project.run Mix PartitionToTimedList Music 'out.wav'}}
    %{Browse {List.length {Mix PartitionToTimedList Music}}}
    %{Browse {PartitionToTimedList [instrument(name:piano [a instrument(name:guitar [[note(duration:1.0 instrument:none name:a octave:4 sharp:false) note(duration:2.0 instrument:none name:b octave:5 sharp:false)]])])]}}
    %{Browse {List.length {Echantillon {PartitionToTimedList [duration(seconds:5.0 [a])]}}.1}}

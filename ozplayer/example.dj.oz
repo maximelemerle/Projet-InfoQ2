@@ -1,7 +1,7 @@
 local
   Main1 = [
   silence(duration:0.6)
-  duration(seconds:0.1 [c#5]) duration(seconds:0.1 [b]) duration(seconds:0.4 [c#5]) duration(seconds:1.0 [f#4]) duration(seconds:0.1 [d5]) duration(seconds:0.1 [c#5]) duration(seconds:0.2 [d5]) duration(seconds:0.2 [c#5]) duration(seconds:1.0 [b])
+  transpose(semitones:1 [duration(seconds:0.1 [c5])]) duration(seconds:0.1 [b]) duration(seconds:0.4 [c#5]) duration(seconds:1.0 [f#4]) duration(seconds:0.1 [d5]) duration(seconds:0.1 [c#5]) duration(seconds:0.2 [d5]) duration(seconds:0.2 [c#5]) duration(seconds:1.0 [b])
   duration(seconds:0.1 [d5]) duration(seconds:0.1 [c#5]) duration(seconds:0.4 [d5]) duration(seconds:1.0 [f#4]) duration(seconds:0.1 [b]) duration(seconds:0.1 [a]) duration(seconds:0.2 [b]) duration(seconds:0.2 [a]) duration(seconds:0.2 [g#4]) duration(seconds:0.2 [b])
   duration(seconds:0.6[a]) duration(seconds:0.1 [c#5]) duration(seconds:0.1 [b]) duration(seconds:0.4 [c#5]) duration(seconds:1.0 [f#4]) duration(seconds:0.1 [d5]) duration(seconds:0.1 [c#5]) duration(seconds:0.2 [d5]) duration(seconds:0.2 [c#5]) duration(seconds:1.0 [b])
   duration(seconds:0.1 [d5]) duration(seconds:0.1 [c#5]) duration(seconds:0.4 [d5]) duration(seconds:1.0 [f#4]) duration(seconds:0.1 [b]) duration(seconds:0.1 [a]) duration(seconds:0.2 [b]) duration(seconds:0.2 [a]) duration(seconds:0.2 [g#4]) duration(seconds:0.2 [b])
@@ -23,13 +23,28 @@ local
   stretch(factor:0.1 [a3 e3 g#2 e3 a3 e3]) silence(duration:0.2) stretch(factor:0.2 [d2 a2 f#3 a2])
   ]
 
+  Vache = 'wave/animals/cow.wav'
 in
   [
-  merge(
-    [
-    1.0#[partition([stretch(factor:1.15 Main1)])]
-    1.0#[partition([stretch(factor:1.15 Main2)])]
-    ]
+  crossfade(
+    seconds:4.0
+    [merge([
+      1.0#[partition([stretch(factor:1.15 Main1)])] 1.0#[partition([stretch(factor:1.15 Main2)])]
+      ]
+    )]
+      [merge([
+        1.0#[cut(start:0.0 finish:8.0
+                [reverse(
+                    [merge( [ 1.0#[partition([stretch(factor:1.15 Main1)])] 1.0#[partition([stretch(factor:1.15 Main2)])] ])]
+                 )]
+              )]
+        1.0#[
+            echo(delay:1.0 decay:0.3 repeat:4 [wave(Vache)])
+          ]
+        ]
+        )]
     )
+    partition([a#8])
+    lowpass([partition([a#8])])
   ]
 end
