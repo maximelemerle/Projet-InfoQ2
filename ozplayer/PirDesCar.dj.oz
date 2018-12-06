@@ -43,7 +43,7 @@ local
   duration(seconds:0.5 [d2]) silence(duration:0.1)
   duration(seconds:0.6 [[d3 d2]]) duration(seconds:0.6 [[d3 d2]]) duration(seconds:0.6 [[a#2 a#1]]) duration(seconds:0.2 [[a#2 a#1]]) duration(seconds:0.4 [[a#2 a#1]])
   duration(seconds:0.6 [[g2 g1]]) duration(seconds:0.6 [[a2 a1]]) duration(seconds:0.6 [[d2 d3]]) duration(seconds:0.6 [[d2 d3]])
-  duration(seconds:0.6 [[a#2 a#3]]) duration(seconds:0.6 [[a#2 a#3]]) duration(seconds:0.6 [[d2 d3]]) duration(seconds:0.6 [[a1 da2]]) 
+  duration(seconds:0.6 [[a#2 a#3]]) duration(seconds:0.6 [[a#2 a#3]]) duration(seconds:0.6 [[d2 d3]]) duration(seconds:0.6 [[a1 a2]]) 
   ]
 
 
