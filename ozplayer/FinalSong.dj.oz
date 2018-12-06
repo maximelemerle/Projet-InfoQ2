@@ -105,7 +105,7 @@ local
   duration(seconds:0.2 [[c5 d5 a f5]]) silence(duration:0.2) stretch(factor:0.2 [[a#4 d5 f5] [a#4 f5] [d5 g5 a]]) silence(duration:0.2)
   duration(seconds:0.2 [[d5 f5 stretch(factor:4.0 [a5])]]) stretch(factor:0.2 [f5 d5])
   duration(seconds:0.6 [a]) silence(duration:0.6) duration(seconds:0.2 [[d5 g5 stretch(factor:4.0 [a#5])]]) stretch(factor:0.2 [g5 d5])
-  duration(seconds:0.6 [a#4])
+  duration(seconds:0.8 [a#4]) silence(duration:0.4) stretch(factor:0.2 [[c#4 e] [c#4 e]]) silence(duration:0.2) duration(seconds:0.2 [[a3 d]]) silence(duration:0.2)
   ]
 
   Part2bis = [
@@ -113,6 +113,9 @@ local
   stretch(factor:0.2 [a1 a2 a1 e2 [a1 a2]]) duration(seconds:0.4 [[g1 g2]]) duration(seconds:0.2 [[g1 g2]]) duration(seconds:0.4 [[g1 g2]]) duration(seconds:0.4 [[g1 g2]])
   ]
 
+  Part2F = [
+  duration(seconds:1.2 [[a3 c#4 f]])
+  ]
 
 in
 
@@ -120,6 +123,7 @@ in
    merge( [0.3#[partition(Meb1)] 0.3#[partition(Meb2)] 0.3#[partition(Meb3)] 0.1#[partition(Meb4)] 0.1#[partition(Meb5)]] )
    merge( [0.3#[partition(Meh1)] 0.3#[partition(Meh2)] 0.3#[partition(Meh3)] 0.15#[partition(Meh4)] 0.15#[partition(Meh5)]] )
    merge( [0.3#[partition(Part2)] 0.3#[partition(Part2bis)]]  )
+  fade(start:0.0 out:1.2 [partition(Part2F)])
    ]
 
 end
