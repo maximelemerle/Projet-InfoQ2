@@ -7,7 +7,7 @@ local
   silence(duration:0.2) stretch(factor:1.2 [[d f a] [d f a#4]])
   duration(seconds:0.2[[c f a]]) silence(duration:0.2) duration(seconds:0.2 [[c f a]]) silence(duration:0.2) duration(seconds:0.2 [[c f a]]) silence(duration: 0.2) duration(seconds:0.2 [[c f a]]) duration(seconds:1.0 [[c e g]])
   stretch(factor:1.2 [[d g a#3] [a3 d f]])
-  stretch(factor:0.4 [[c#4 e a3] [a3 d f] [c#4 e a3]]) duration(seconds:1 [[d a3]])
+  stretch(factor:0.4 [[c#4 e a3] [a3 d f] [c#4 e a3]]) duration(seconds:1.0 [[d a3]])
   ]
 
   Part3bis = [
