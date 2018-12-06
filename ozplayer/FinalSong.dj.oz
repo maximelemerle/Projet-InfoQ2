@@ -117,9 +117,9 @@ local
 in
 
    [
-     merge( [0.3#[partition(Intro1)] 0.3#[partition(Intro2)] 0.3#[partition(Intro3)] 0.15#[partition(Intro4)] 0.15#[partition(Intro5)]] )
-     merge( [0.3#[partition(Main1)] 0.3#[partition(Main2)] 0.3#[partition(Main3)] 0.15#[partition(Main4)] 0.15#[partition(Main5)]] )
-     merge( [0.3#[partition(Part2)] 0.3#[partition(Part2bis)]]  )
+   merge( [0.3#[partition(Meb1)] 0.3#[partition(Meb2)] 0.3#[partition(Meb3)] 0.1#[partition(Meb4)] 0.1#[partition(Meb5)]] )
+   merge( [0.3#[partition(Meh1)] 0.3#[partition(Meh2)] 0.3#[partition(Meh3)] 0.15#[partition(Meh4)] 0.15#[partition(Meh5)]] )
+   merge( [0.3#[partition(Part2)] 0.3#[partition(Part2bis)]]  )
    ]
 
 end
